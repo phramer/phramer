@@ -1,7 +1,0 @@
-outs:
-- persist: false
-  md5: 6b22437746bdae2d5fc11339386e7897
-  metric: false
-  cache: true
-  path: data_raw_1m.csv
-md5: d933b99f10acbd4d1296509cce0e1bb1
