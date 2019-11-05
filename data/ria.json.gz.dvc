@@ -1,0 +1,11 @@
+locked: true
+md5: 6806cdef416182d279c4c11065201b0c
+deps:
+- etag: '"59a25bbcb14a261a82ac6baa84d11d23ca2125c28f0cc1905418b5301a8cb12d"'
+  path: https://media.githubusercontent.com/media/sdll/ria_news_dataset/master/ria.json.gz
+outs:
+- persist: false
+  metric: false
+  cache: true
+  md5: 432f6cd79e5c2c1f19ca7abc9e0f100c
+  path: ria.json.gz
