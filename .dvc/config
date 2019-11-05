@@ -1,0 +1,4 @@
+['remote "storage"']
+url = /home/phramer/.storage/
+[core]
+remote = storage
