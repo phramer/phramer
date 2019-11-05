@@ -14,7 +14,7 @@
 
 2. Please make sure that you run in a Docker container or a virtual environment and install requirements:
     ```bash
-    virtualenv --no-site-packages .env .env
+    python -m venv --no-site-packages .env
     . .env/bin/activate
     pip install -r requirements.txt
     ```
