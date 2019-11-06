@@ -1,0 +1,11 @@
+outs:
+- md5: 41465b8d8ec1b5ed9f6e3598c7641217
+  persist: false
+  metric: false
+  cache: true
+  path: ria.json
+deps:
+- md5: 432f6cd79e5c2c1f19ca7abc9e0f100c
+  path: ria.json.gz
+cmd: gzip -kd ria.json.gz
+md5: 5d1e0670304a15086dd4498466bed64b
