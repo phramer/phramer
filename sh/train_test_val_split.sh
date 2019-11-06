@@ -1,6 +1,6 @@
-TRAIN_SIZE=80000
-TEST_SIZE=10000
-DATA_PATH=/home/phramer/data/small_ria
+TRAIN_SIZE=8000
+TEST_SIZE=1000
+DATA_PATH=/home/phramer/data/extra_small_ria
 
 head -n $TRAIN_SIZE $DATA_PATH/ria.articles > $DATA_PATH/train.ria.articles
 tail -n +${TRAIN_SIZE} $DATA_PATH/ria.articles > $DATA_PATH/test_valid.ria.articles
