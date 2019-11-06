@@ -12,10 +12,17 @@
     cd phramer
     ```
 
-2. Please make sure that you run in a Docker container or a virtual environment and install requirements:
+2. Please make sure that you run in a Docker container or a virtual environment and install the dependencies:
     ```bash
     python -m venv --no-site-packages .env
     . .env/bin/activate
     pip install -r requirements.txt
+    ```
+
+    If you would like to contribute to the project, please install dev dependencies as well: 
+
+    ```bash
+    . .env/bin/activate
+    pip install -r dev-requirements.txt
     ```
 
