@@ -1,0 +1,11 @@
+deps:
+- etag: '"59a25bbcb14a261a82ac6baa84d11d23ca2125c28f0cc1905418b5301a8cb12d"'
+  path: https://github.com/RossiyaSegodnya/ria_news_dataset/raw/master/ria.json.gz
+md5: b7290eae8aee3524bfc2aae124e11692
+outs:
+- metric: false
+  path: ria.json.gz
+  cache: true
+  md5: 432f6cd79e5c2c1f19ca7abc9e0f100c
+  persist: false
+locked: true
