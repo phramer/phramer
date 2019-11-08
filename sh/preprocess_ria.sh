@@ -1,6 +1,6 @@
-DATA_PATH=/home/phramer/data/small_ria
+DATA_PATH=/home/phramer/data/ria
 FAIRSEQ_PATH=/home/phramer/fairseq/
-DEST_DIR=/home/phramer/data/small_ria/data-bin/
+DEST_DIR=/home/phramer/data/ria/data-bin/
 
 python3 $FAIRSEQ_PATH/preprocess.py --source-lang articles --target-lang summaries \
   --trainpref $DATA_PATH/train.ria --validpref $DATA_PATH/valid.ria --testpref $DATA_PATH/test.ria \
