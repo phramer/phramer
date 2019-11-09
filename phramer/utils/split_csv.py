@@ -16,7 +16,7 @@ def split_csv():
         "--save_dir",
         type=str,
         required=False,
-        default="ria.csv",
+        default="data/ria_splitted/",
         help="dir where to save articles and summaries",
     )
     args = parser.parse_args()
