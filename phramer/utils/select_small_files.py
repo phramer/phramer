@@ -54,7 +54,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        os.makedirs(irectory)
+        os.makedirs(args.save_dir)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
