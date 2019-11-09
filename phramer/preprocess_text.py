@@ -69,7 +69,7 @@ def preprocess_corpus(data_path, new_path, workers=50):
     print(ORIGIN_FOLDER_PATH)
     origin_folder_path = data_path[:data_path.rfind('/') + 1] + 'origin/'
     ORIGIN_FOLDER_PATH = origin_folder_path
-    '''
+
     try:
         os.mkdir(origin_folder_path)
     except OSError:
@@ -77,12 +77,11 @@ def preprocess_corpus(data_path, new_path, workers=50):
     else:
         print ("Successfully created the directory %s " % origin_folder_path)
     
-    '''
     ### Create folder for processed files
     global PREPROCESSED_FOLDER_PATH
     preprocessed_folder_path = data_path[:data_path.rfind('/') + 1] + 'preprocessed/'
     PREPROCESSED_FOLDER_PATH = preprocessed_folder_path
-    '''
+
     try:
         os.mkdir(preprocessed_folder_path)
     except OSError:
@@ -111,8 +110,7 @@ def preprocess_corpus(data_path, new_path, workers=50):
     file_names = os.listdir(origin_folder_path)
     p = Pool(workers)
     list(tqdm.tqdm(p.imap(process_file, file_names), total=len(file_names)))
-    '''
-    
+     
     ### Uniting files
     print("Uniting files")
     processed_files = os.listdir(preprocessed_folder_path)
