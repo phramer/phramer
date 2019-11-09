@@ -1,0 +1,14 @@
+outs:
+- metric: false
+  path: data/ria.csv
+  md5: 83215e3232e30e34093824ef6f4f5520
+  persist: false
+  cache: true
+wdir: ..
+deps:
+- path: phramer/utils/json_to_csv.py
+  md5: f9d0352f69bce4a80b54944e47a7c428
+- path: data/ria.json
+  md5: 41465b8d8ec1b5ed9f6e3598c7641217
+md5: 402fe3e7974ffa3e08428b02a2665158
+cmd: python phramer/utils/json_to_csv.py --file_path data/ria.json --save_name data/ria.csv
