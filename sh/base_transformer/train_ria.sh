@@ -1,4 +1,4 @@
-FAIRSEQ_PATH=/home/phramer/fairseq/
+FAIRSEQ_PATH=~/fairseq/
 DATA_PATH=/home/phramer/data/short_ria/data-bin/
 LM_CHECKPOINT_PATH=/home/whiteRa2bit/checkpoints/short_ria/
 
@@ -10,4 +10,5 @@ python $FAIRSEQ_PATH/train.py $DATA_PATH --clip-norm 0.1 \
   --max-tokens 3000 --criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
   --max-epoch 200 --arch  transformer --save-dir $LM_CHECKPOINT_PATH --bpe bert \
   --source-lang articles --target-lang summaries  --num-workers 70 \
-  --memory-efficient-fp16
+  --memory-efficient-fp16 --keep-last-epochs 10	--logging True
+
