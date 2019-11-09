@@ -1,5 +1,7 @@
 import argparse
 import tqdm
+import os, errno
+
 
 def select_short_files(data_dir, save_dir, max_len):
     with open(data_dir + '/ria.preprocessed.articles', 'rb') as f:
@@ -51,6 +53,12 @@ def main():
     )
 
     args = parser.parse_args()
+
+    try:
+        os.makedirs(args.save_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
     select_short_files(args.data_dir, args.save_dir, args.max_len)
 
