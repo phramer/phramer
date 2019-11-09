@@ -3,6 +3,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import argparse
 import tqdm
+import os, errno
 
 def split_csv():
     parser = argparse.ArgumentParser(description="args to transform file")
@@ -16,10 +17,17 @@ def split_csv():
         "--save_dir",
         type=str,
         required=False,
-        default="ria.csv",
+        default="data/ria_splitted/",
         help="dir where to save articles and summaries",
     )
     args = parser.parse_args()
+
+    # create target dir if don't exist
+    try:
+        os.makedirs(args.save_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
     print("Reading data...")
     data = pd.read_csv(args.data_path)
