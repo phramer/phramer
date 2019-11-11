@@ -20,8 +20,9 @@ def select_short_files(data_dir, save_dir, max_len):
 
     f_articles = open(save_dir + '/ria.articles', 'wb')
     f_summaries = open(save_dir + '/ria.summaries', 'wb')
-
-    for i in range(len(short_idxs)):         
+ 
+    print("Writing data...")
+    for i in tqdm.tqdm(range(len(short_idxs))):         
         f_articles.write(articles[short_idxs[i]])
         f_summaries.write(summaries[short_idxs[i]])
     

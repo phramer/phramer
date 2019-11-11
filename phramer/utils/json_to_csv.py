@@ -2,6 +2,7 @@ import json
 import pandas as pd
 from bs4 import BeautifulSoup
 import argparse
+import tqdm
 
 
 def json_to_csv():
@@ -21,12 +22,14 @@ def json_to_csv():
     )
     args = parser.parse_args()
 
+    print("Openning file...")
     with open(args.file_path, "r") as data:
         json_data = data.readlines()
 
+    print("Processing html format...")
     soups = [
         BeautifulSoup(json.loads(json_data[i])["text"], "lxml")
-        for i in range(len(json_data))
+        for i in tqdm.tqdm(range(len(json_data)))
     ]
     texts = [
         soup.text.replace(u"\xa0", u" ").replace("\n", "") for soup in soups
