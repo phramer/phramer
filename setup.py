@@ -6,7 +6,8 @@ requirements = ['pandas==0.24.2',
                 'dvc==0.66.11',
                 'comet-ml==2.0.16',
                 'bs4==0.0.1',
-                'tqdm==4.37.0']
+                'tqdm==4.37.0',
+                'google-cloud-storage==1.19.0']
 
 dev_requirements = ['pre-commit',
                     'black']
