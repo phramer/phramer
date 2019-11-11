@@ -5,6 +5,7 @@ import argparse
 import tqdm
 import os, errno
 
+
 def split_csv():
     parser = argparse.ArgumentParser(description="args to transform file")
     parser.add_argument(
@@ -31,25 +32,25 @@ def split_csv():
 
     print("Reading data...")
     data = pd.read_csv(args.data_path)
-    articles = data['text'].values
-    titles = data['title'].values
+    articles = data["text"].values
+    titles = data["title"].values
 
-    f = open(args.save_dir + '/ria.articles', 'w')
-    
+    f = open(args.save_dir + "/ria.articles", "w")
+
     print("Processing articles...")
     for article in tqdm.tqdm(articles):
-        article = str(article).replace('\n', '')
+        article = str(article).replace("\n", "")
         f.write(article)
-        f.write('\n')
+        f.write("\n")
     f.close()
 
     print("Processing summaries...")
-    f = open(args.save_dir + '/ria.summaries', 'w')
+    f = open(args.save_dir + "/ria.summaries", "w")
     for title in tqdm.tqdm(titles):
-        title = str(title).replace('\n', '')
+        title = str(title).replace("\n", "")
         f.write(title)
-        f.write('\n')
-    f.close()    
+        f.write("\n")
+    f.close()
 
 
 if __name__ == "__main__":
