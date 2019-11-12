@@ -26,6 +26,23 @@
     pip install -r dev-requirements.txt
     ```
 
+## Getting data from DVC
+To get the data and reproduced models you should pull it from our dvc storage:
+```bash
+dvc pull
+```
+
+To get one specific file pull target dvc file:
+```bash
+dvc pull data.dvc
+```
+
+## How to contribute
+To continue our work you should make your own DVC remote storage to store your data and models.
+It may be local storage on you machine or any other cloud service (see [dvc docs](https://dvc.org/doc/command-reference/remote/add)).
+
+Take a look to our instructions in `howto` section [here][remote_storage].
+
 ## Howto
 Here is instruction how to create you own DVC project by yourself.
 
@@ -40,6 +57,7 @@ Here is instruction how to create you own DVC project by yourself.
     # git commit -m "Initialize DVC project"
     ```
 
+[remote_storage]:
 2. Set up remote storage (similar to the way you use Git server to store and share your code):
     * Local Storage
         ```bash
