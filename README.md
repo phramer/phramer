@@ -41,15 +41,15 @@ dvc pull data.dvc
 To continue our work you should make your own DVC remote storage to store your data and models.
 It may be local storage on you machine or any other cloud service (see [dvc docs](https://dvc.org/doc/command-reference/remote/add)).
 
-Take a look to our instructions in `howto` section [here][remote_storage].
+Take a look to our instructions in `howto` section [here][remote_storage] to create remote storage.
 
-## Howto
+Then *push* your data to the storage by running following command:
+```bash
+dvc push
+```
+
+## Setting up a custom DVC project
 Here is instruction how to create you own DVC project by yourself.
-
-0. Make sure you destroy our DVC workspace in repository:
-    ```bash
-    dvc destroy
-    ```
 
 1. Create the DVC project:
     ```bash
@@ -95,3 +95,23 @@ Here is instruction how to create you own DVC project by yourself.
     dvc add data/data.xml
     # git add data/.gitignore data/data.xml.dvc
     # git commit -m "Add raw data to project"
+    ```
+
+5. To track the data you get by running scripts you should use following command:
+    ```bash
+    dvc run -f script.dvc \
+            -d script.py -d input_data \
+            -o output_data \
+            python script.py input_data
+    ```
+
+6. After you end with managing your data and models you should `push` it to your remote storage:
+    ```bash
+    dvc push
+    ```
+
+7. Then, you can retrieve your data using `pull` command:
+    ```bash
+    dvc pull
+    ```
+
