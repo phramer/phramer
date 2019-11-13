@@ -11,6 +11,7 @@ requirements = [
 ]
 
 dev_requirements = ["pre-commit", "black"]
+ru_requirements = ["pymystem3", "nltk", "beautifulsoup4", "lxml"]
 
 setup(
     name="phramer",
