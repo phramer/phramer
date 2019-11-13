@@ -1,3 +1,4 @@
+from functools import partial
 import gc
 import json
 import multiprocessing as mp
@@ -18,13 +19,13 @@ from phramer.config import (
     RIA_DATASET_TAG,
     SUMMARIES_TAG,
 )
-from phramer.data import Dataset
-from phramer.utils.file import chunkify, process_chunk
+from phramer.utils.distributed import chunkify, process_chunk
+from phramer.utils.file import count_lines
 
 nltk.download("stopwords")
 
 
-class RIANewsDataset(Dataset):
+class RIANewsDataset:
     def _parse_html(self, html):
         return BeautifulSoup(html, "lxml").text.replace("\xa0", " ")
 
@@ -66,29 +67,33 @@ class RIANewsDataset(Dataset):
             text = self._lemmatize(text)
         return text
 
-    def parse_record(
-        self, record, should_lemmatize, articles_queue, summaries_queue
-    ):
+    def parse_record(self, record, queue, should_lemmatize=True):
         json_data = json.loads(record)
+        print(json_data)
 
         article = self._process_article(
             json_data["text"], should_lemmatize=should_lemmatize
         )
-        articles_queue.put(article)
-
         title = json_data["title"]
-        summaries_queue.put(title)
+
+        queue.put((article, title))
 
         return article, title
 
-    def _listener(self, queue, filename):
-        with open(filename, "w") as f:
+    def _listener(self, queue, articles_fn, summaries_fn):
+        with open(articles_fn, "w") as articles, open(
+            summaries_fn, "w"
+        ) as summaries:
             while True:
                 message = queue.get()
                 if message == PHRAMER_STOP_MESSAGE:
                     break
-                print(str(message), file=f)
-                f.flush()
+                article, summary = message
+                print(message)
+                articles.write(str(article) + "\n")
+                summaries.write(str(summary) + "\n")
+                articles.flush()
+                summaries.flush()
 
     def _parse_raw(
         self,
@@ -99,9 +104,6 @@ class RIANewsDataset(Dataset):
         skiplines=0,
         **kwargs,
     ):
-        with open(source_filename, "rb") as source:
-            source_num_lines = sum(1 for _ in source)
-
         target_dir = Path(target_dir)
         target_dir.mkdir(parents=True, exist_ok=True)
         target_articles_path = target_dir / "{}.{}".format(
@@ -110,62 +112,40 @@ class RIANewsDataset(Dataset):
         target_summaries_path = target_dir / "{}.{}".format(
             RIA_DATASET_TAG, SUMMARIES_TAG
         )
+        if target_articles_path.exists() or target_summaries_path.exists():
+            raise RuntimeError(
+                "Aborted the attempt to overwrite "
+                + "existing files {} and {}".format(
+                    target_articles_path, target_summaries_path
+                )
+            )
 
         should_lemmatize = getattr(kwargs, "lemmatize", True)
 
         manager = mp.Manager()
         pool = mp.Pool(num_workers, maxtasksperchild=MAX_TASKS_PER_CHILD)
 
-        # article writer
-        articles_queue = manager.Queue()
+        # init writer
+        queue = manager.Queue()
         pool.apply_async(
-            self._listener, [articles_queue, target_articles_path]
+            self._listener,
+            [queue, target_articles_path, target_summaries_path],
         )
         print("Started the queue for articles...")
 
-        # summary writer
-        summaries_queue = manager.Queue()
-        pool.apply_async(
-            self._listener, [summaries_queue, target_summaries_path]
-        )
-        print("Started the queue for titles...")
-
-        jobs = chunkify(
-            source_filename,
-            size=int(1024 * 1024 * chunk_size),
-            skiplines=skiplines,
-        )
-        print(
-            "Running {} workers on {} chunks...".format(num_workers, len(jobs))
-        )
-
-        jobs = [
-            list(job)
-            + [
-                self.parse_record,
-                should_lemmatize,
-                articles_queue,
-                summaries_queue,
-            ]
-            for job in jobs
-        ]
-
-        with tqdm(
-            total=(len(jobs) - 1) // num_workers + 1, desc="Jobs"
-        ) as pbar:
-            for worker_idx in range(0, len(jobs), num_workers):
-                for i, _ in tqdm(
-                    enumerate(
-                        pool.imap_unordered(
-                            process_chunk,
-                            jobs[worker_idx : worker_idx + num_workers],
-                        )
-                    )
+        num_lines = count_lines(source_filename)
+        with open(source_filename, "r") as source:
+            with tqdm(total=num_lines, desc="Lines") as pbar:
+                for _ in pool.imap_unordered(
+                    partial(
+                        self.parse_record,
+                        queue=queue,
+                        should_lemmatize=should_lemmatize,
+                    ),
+                    source,
                 ):
                     pbar.update()
-                gc.collect()
-        articles_queue.put(PHRAMER_STOP_MESSAGE)
-        summaries_queue.put(PHRAMER_STOP_MESSAGE)
+        queue.put(PHRAMER_STOP_MESSAGE)
         pool.close()
         pool.terminate()
         print("Finished processing the RIA dataset.")

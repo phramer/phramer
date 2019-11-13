@@ -5,3 +5,7 @@ MAX_TASKS_PER_CHILD = 1000
 RIA_DATASET_TAG = "ria"
 ARTICLES_TAG = "articles"
 SUMMARIES_TAG = "summaries"
+TRAIN_VAL_TEST_SPLIT = (80, 10, 10)
+TRAIN_TAG = "train"
+TEST_TAG = "test"
+VAL_TAG = "val"
