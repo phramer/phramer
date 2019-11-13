@@ -1,8 +1,8 @@
-from functools import partial
 import gc
 import json
 import multiprocessing as mp
 import re
+from functools import partial
 from pathlib import Path
 from string import punctuation
 
@@ -19,7 +19,6 @@ from phramer.config import (
     RIA_DATASET_TAG,
     SUMMARIES_TAG,
 )
-from phramer.utils.distributed import chunkify, process_chunk
 from phramer.utils.file import count_lines
 
 nltk.download("stopwords")
@@ -42,7 +41,6 @@ class RIANewsDataset:
         text = re.sub(r" . . . ", " ", text)
         text = re.sub(r" .  .  . ", " ", text)
         text = re.sub(r" ! ! ", " ! ", text)
-        text = text.replace("\n", "")
         return text
 
     def _lemmatize(self, text):
@@ -65,11 +63,11 @@ class RIANewsDataset:
         text = self._filter(text)
         if should_lemmatize:
             text = self._lemmatize(text)
+        text = text.replace("\n", " ")
         return text
 
     def parse_record(self, record, queue, should_lemmatize=True):
         json_data = json.loads(record)
-        print(json_data)
 
         article = self._process_article(
             json_data["text"], should_lemmatize=should_lemmatize
@@ -89,7 +87,6 @@ class RIANewsDataset:
                 if message == PHRAMER_STOP_MESSAGE:
                     break
                 article, summary = message
-                print(message)
                 articles.write(str(article) + "\n")
                 summaries.write(str(summary) + "\n")
                 articles.flush()
@@ -100,7 +97,6 @@ class RIANewsDataset:
         source_filename,
         target_dir,
         num_workers=mp.cpu_count() - 1,
-        chunk_size=100,
         skiplines=0,
         **kwargs,
     ):
@@ -131,10 +127,8 @@ class RIANewsDataset:
             self._listener,
             [queue, target_articles_path, target_summaries_path],
         )
-        print("Started the queue for articles...")
-
         num_lines = count_lines(source_filename)
-        with open(source_filename, "r") as source:
+        with open(source_filename, "rb") as source:
             with tqdm(total=num_lines, desc="Lines") as pbar:
                 for _ in pool.imap_unordered(
                     partial(
