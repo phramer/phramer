@@ -29,7 +29,7 @@ def split(
     target_dir = Path(target_dir)
     paths = [
         [
-            target_dir / (tag + Path(data_path).name)
+            target_dir / "{}.{}".format(tag, Path(data_path).name)
             for data_path in [texts_path, summaries_path]
         ]
         for tag in [TEST_TAG, VAL_TAG, TRAIN_TAG]
@@ -44,7 +44,9 @@ def split(
         with tqdm(total=articles_num_lines, desc="Lines") as pbar:
             threshold = thresholds.pop()
             target_articles_path, target_summaries_path = paths.pop()
-            for line_idx, text, summary in enumerate(zip(articles, summaries)):
+            for line_idx, (text, summary) in enumerate(
+                zip(articles, summaries)
+            ):
                 if line_idx >= threshold:
                     target_articles_path, target_summaries_path = paths.pop()
                     threshold = thresholds.pop()

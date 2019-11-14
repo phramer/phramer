@@ -1,13 +1,25 @@
 import gc
-from phramer.config import MAX_TASKS_PER_CHILD
-from phramer.utils.distributed import chunkify, process_chunk
+import hashlib
 import multiprocessing as mp
+import os
+from pathlib import Path
+
+from phramer.config import DEFAULT_PHRAMER_HOME, MAX_TASKS_PER_CHILD
+from phramer.utils.distributed import chunkify, process_chunk
 
 
 def count_lines(filename):
     with open(filename, "rb") as f:
         num_lines = sum(1 for _ in f)
     return num_lines
+
+
+def list_files(dirname):
+    paths = []
+    for item in Path(dirname).glob("*"):
+        if item.is_file():
+            paths.append(item.absolute())
+    return paths
 
 
 class ParallelIO:
