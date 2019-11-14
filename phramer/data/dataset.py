@@ -26,6 +26,9 @@ nltk.download("stopwords")
 
 
 class CNNDailyMail:
+    """
+    Handler for CNN DailyMail dataset
+    """
     def _fix_missing_period(self, line):
         if line == "":
             return line
@@ -154,11 +157,17 @@ class CNNDailyMail:
 
 
 class GigawordDataset:
+    """
+    Handler for Gigaword dataset
+    """
     def preprocess(self):
         pass
 
 
 class RIANewsDataset:
+    """
+    Handler for RIA News dataset
+    """
     def __init__(self):
         from bs4 import BeautifulSoup
         from pymystem3 import Mystem
