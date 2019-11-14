@@ -29,6 +29,7 @@ class CNNDailyMail:
     """
     Handler for CNN DailyMail dataset
     """
+
     def _fix_missing_period(self, line):
         if line == "":
             return line
@@ -37,15 +38,29 @@ class CNNDailyMail:
         return line + " ."
 
     def _filter(self, line):
-        english_stopwords = stopwords.words("english") 
+        line = line.lower()
         line = self._fix_missing_period(line)
-
         return line
 
     def _lemmatize(self, line):
-        pass
+        from nltk.stem import WordNetLemmatizer
+
+        english_stopwords = stopwords.words("english")
+        lemmatizer = WordNetLemmatizer()
+        tokens = lemmatizer.lemmatize(line)
+        tokens = [
+            token
+            for token in tokens
+            if token not in english_stopwords
+            and token != " "
+            and token.strip() not in punctuation
+        ]
+        text = " ".join(tokens)
+        text = re.sub(" +", " ", text)
+        return text
+
     def _process_line(self, line):
-        return self._lemmatize(self._filter(line.lower())) 
+        return self._lemmatize(self._filter(line))
 
     def _parse_lines(self, lines):
         article_lines = []
@@ -60,6 +75,7 @@ class CNNDailyMail:
                 highlight_lines.append(line)
             else:
                 article_lines.append(line)
+
         article = " ".join(article_lines)
         summary = " ".join(
             [
@@ -160,6 +176,7 @@ class GigawordDataset:
     """
     Handler for Gigaword dataset
     """
+
     def preprocess(self):
         pass
 
@@ -168,11 +185,10 @@ class RIANewsDataset:
     """
     Handler for RIA News dataset
     """
-    def __init__(self):
-        from bs4 import BeautifulSoup
-        from pymystem3 import Mystem
 
     def _parse_html(self, html):
+        from bs4 import BeautifulSoup
+
         return BeautifulSoup(html, "lxml").text.replace("\xa0", " ")
 
     def _filter(self, text):
@@ -191,6 +207,8 @@ class RIANewsDataset:
         return text
 
     def _lemmatize(self, text):
+        from pymystem3 import Mystem
+
         mystem = Mystem()
         russian_stopwords = stopwords.words("russian")
         tokens = mystem.lemmatize(text.lower())
