@@ -8,6 +8,9 @@ requirements = [
     "comet-ml==2.0.16",
     "bs4==0.0.1",
     "tqdm==4.37.0",
+    "nltk",
+    "numpy",
+    "six",
 ]
 
 dev_requirements = ["pre-commit", "black"]

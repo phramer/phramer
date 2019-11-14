@@ -1,4 +1,3 @@
-from pathlib import Path
 import json
 import multiprocessing as mp
 import re
@@ -7,9 +6,7 @@ from pathlib import Path
 from string import punctuation
 
 import nltk
-from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
-from pymystem3 import Mystem
 from tqdm import tqdm
 
 from phramer.config import (
@@ -17,11 +14,11 @@ from phramer.config import (
     CNNDM_END_TOKENS,
     CNNDM_SENTENCE_END,
     CNNDM_SENTENCE_START,
+    CNNDM_TAG,
     MAX_TASKS_PER_CHILD,
     PHRAMER_STOP_MESSAGE,
     RIA_DATASET_TAG,
     SUMMARIES_TAG,
-    CNNDM_TAG,
 )
 from phramer.utils.file import count_lines, list_files
 
@@ -36,8 +33,15 @@ class CNNDailyMail:
             return line
         return line + " ."
 
+    def _filter(self, line):
+        english_stopwords = stopwords.words("english") 
+        line = self._fix_missing_period(line)
+
+        return line
+
+    def _lemmatize(self, line):
     def _process_line(self, line):
-        return self._fix_missing_period(line.lower())
+        return self._lemmatize(self._filter(line.lower())) 
 
     def _parse_lines(self, lines):
         article_lines = []
@@ -149,7 +153,16 @@ class CNNDailyMail:
         pool.terminate()
 
 
+class GigawordDataset:
+    def preprocess(self):
+        pass
+
+
 class RIANewsDataset:
+    def __init__(self):
+        from bs4 import BeautifulSoup
+        from pymystem3 import Mystem
+
     def _parse_html(self, html):
         return BeautifulSoup(html, "lxml").text.replace("\xa0", " ")
 
