@@ -48,6 +48,11 @@ Then *push* your data to the storage by running following command:
 dvc push
 ```
 
+## Datasets
+1. [Gigaword dataset](https://drive.google.com/open?id=0B6N7tANPyVeBNmlSX19Ld2xDU1E)
+2. [CNN DailyMail](https://drive.google.com/uc?export=download&id=0BwmD_VLjROrfTHk4NFg2SndKcjQ)
+3. [RIA News](https://github.com/RossiyaSegodnya/ria_news_dataset/blob/master/ria.json.gz)
+
 ## Setting up a custom DVC project
 Here is instruction how to create you own DVC project by yourself.
 
