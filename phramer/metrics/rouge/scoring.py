@@ -9,8 +9,6 @@ import collections
 
 import numpy as np
 import six
-from six.moves import range
-
 
 class Score(
     collections.namedtuple("Score", ["precision", "recall", "fmeasure"])

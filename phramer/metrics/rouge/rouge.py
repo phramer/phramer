@@ -20,9 +20,9 @@ ROUGE-1.5.5.pl -m -e ./data -n 2 -a /tmp/rouge/settings.xml
 Where settings.xml provides target and decode text.
 """
 
-from rouge import io
-from rouge import rouge_scorer
-from rouge import scoring
+from phramer.metrics.rouge import io
+from phramer.metrics.rouge import rouge_scorer
+from phramer.metrics.rouge import scoring
 
 
 def main(argv):

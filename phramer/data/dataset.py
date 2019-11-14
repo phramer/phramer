@@ -40,6 +40,7 @@ class CNNDailyMail:
         return line
 
     def _lemmatize(self, line):
+        pass
     def _process_line(self, line):
         return self._lemmatize(self._filter(line.lower())) 
 
@@ -78,7 +79,7 @@ class CNNDailyMail:
         while True:
             message = reading_queue.get()
             if message == PHRAMER_STOP_MESSAGE:
-                break
+                processing_queue.put(PHRAMER_STOP_MESSAGE)
             processing_queue.put(self._read_text_file(message))
 
     def _writing_listener(
@@ -147,7 +148,6 @@ class CNNDailyMail:
             reading_queue.put(filename)
 
         reading_queue.put(PHRAMER_STOP_MESSAGE)
-        processing_queue.put(PHRAMER_STOP_MESSAGE)
 
         pool.close()
         pool.terminate()
