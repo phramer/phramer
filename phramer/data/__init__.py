@@ -19,6 +19,17 @@ def split(
     target_dir=Path("."),
     ratio=TRAIN_VAL_TEST_SPLIT,
 ):
+    """
+    Splits texts and summaries on train/test 
+    
+    Args:
+        texts_path: path to the file with texts
+        summaries_path: path to the file with summaries
+        target_dir: dir to save splitted texts and summaries
+                    (default: Path("."))
+        ratio: ratio of train/val/test split
+               (default: look at phramer/phramer/config.py)
+    """
     articles_num_lines = count_lines(texts_path)
     summaries_num_lines = count_lines(summaries_path)
     assert articles_num_lines == summaries_num_lines, (
@@ -65,6 +76,16 @@ def sample_from_files(
     method=BY_LENGTH,
     **kwargs
 ):
+    """
+        Samples small
+        
+        Args:
+            articles_path: path to the file with articles
+            summaries_path: path to the file with summaries
+            target_dir: dir to save sampled articles and summaries
+            method: we have only methof BY_LENGTH now, cuz we are lazy lmao
+                    (see phramer/phramer/config.py:SAMPLING_METHODS)
+    """
     if not target_dir:
         raise ValueError("Please provide a target directory.")
 
