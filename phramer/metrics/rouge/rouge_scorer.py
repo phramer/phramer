@@ -26,11 +26,11 @@ from phramer.metrics.rouge import scoring, tokenize
 class RougeScorer(scoring.BaseScorer):
     """Calculate rouges scores between two blobs of text.
 
-  Sample usage:
-    scorer = RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
-    scores = scorer.score('The quick brown fox jumps over the lazy dog',
-                          'The quick brown dog jumps on the log.')
-  """
+      Sample usage:
+        scorer = RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
+        scores = scorer.score('The quick brown fox jumps over the lazy dog',
+                              'The quick brown dog jumps on the log.')
+    """
 
     def __init__(self, rouge_types, use_stemmer=False):
         """Initializes a new RougeScorer.

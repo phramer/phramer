@@ -1,27 +1,14 @@
-# coding=utf-8
-# Copyright 2019 The Google Research Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# Lint as: python2, python3
 """Library for reading/writing input and score files."""
 
+from tqdm import tqdm
 import glob
+import logging
+import multiprocessing as mp
 
 import six
-from six.moves import zip
-from six.moves import zip_longest
-import logging
+from six.moves import zip, zip_longest
+from phramer.config import MAX_TASKS_PER_CHILD, PHRAMER_STOP_MESSAGE
+
 
 def compute_scores_and_write_to_csv(
     target_filepattern,
@@ -30,6 +17,7 @@ def compute_scores_and_write_to_csv(
     scorer,
     aggregator,
     delimiter="\n",
+    **kwargs
 ):
     """Runs aggregate score calculations and outputs results to a CSV file.
 
@@ -43,17 +31,30 @@ def compute_scores_and_write_to_csv(
          delimiter: Record delimiter.
      """
 
+    num_workers = getattr(kwargs, "num_workers", mp.cpu_count() - 1)
     target_filenames = _glob(target_filepattern)
     prediction_filenames = _glob(prediction_filepattern)
-    scores = _compute_scores(
-        target_filenames, prediction_filenames, scorer, delimiter
-    )
-    if aggregator:
-        for score in scores:
-            aggregator.add_scores(score)
-        _write_aggregates_to_csv(output_filename, aggregator.aggregate())
+    if num_workers <= 0:
+        raise ValueError("The number of workers must be positive.")
+    elif num_workers == 1:
+        scores = _compute_scores(
+            target_filenames, prediction_filenames, scorer, delimiter
+        )
+        if aggregator:
+            for score in scores:
+                aggregator.add_scores(score)
+            _write_aggregates_to_csv(output_filename, aggregator.aggregate())
+        else:
+            _write_scores_to_csv(output_filename, scores)
     else:
-        _write_scores_to_csv(output_filename, scores)
+        _parallel_compute_and_write_scores(
+            target_filenames,
+            prediction_filenames,
+            scorer,
+            delimiter,
+            aggregator,
+            num_workers,
+        )
 
 
 def _glob(filepattern):
@@ -69,8 +70,7 @@ def _record_gen(filename, delimiter):
     with _open(filename) as f:
         records = f.read().split(six.ensure_str(delimiter))
     if records[-1]:
-        # Need a final delimiter at end of file to be able to detect an empty last
-        # record.
+        logging.warn("Expected delimiter at end of file")
     else:
         records = records[:-1]
     for record in records:
@@ -204,4 +204,89 @@ def _write_scores_to_csv(output_filename, scores):
                 )
             out_file.write("\n")
     logging.info("Finished writing results.")
+
+
+def _reading_listener(reading_queue, processing_queue, delimiter):
+    while True:
+        message = reading_queue.get()
+        if message == PHRAMER_STOP_MESSAGE:
+            processing_queue.put(PHRAMER_STOP_MESSAGE)
+            break
+
+        target_filename, prediction_filename = message
+        targets = _record_gen(target_filename, delimiter)
+        preds = _record_gen(prediction_filename, delimiter)
+        
+        processing_queue.put(_record_gen(message, delimiter))
+
+
+def _processing_listener(processing_queue, writing_queue, aggregator):
+    while True:
+        message = processing_queue.get()
+        if message == PHRAMER_STOP_MESSAGE:
+            writing_queue.put(PHRAMER_STOP_MESSAGE)
+            break
+        writing_queue.put(_record_gen(message, delimiter))
+
+
+def _writing_listener(output_filename, writing_queue, num_messages):
+    with open(output_filename, "w") as output_file:
+        with tqdm(total=num_messages, desc="Writes") as pbar:
+            output_file.write("score_type,low,mid,high\n")
+            for score_type, aggregate in sorted(aggregates.items()):
+                output_file.write(
+                    "%s-R,%f,%f,%f\n"
+                    % (
+                        score_type,
+                        aggregate.low.recall,
+                        aggregate.mid.recall,
+                        aggregate.high.recall,
+                    )
+                )
+                output_file.write(
+                    "%s-P,%f,%f,%f\n"
+                    % (
+                        score_type,
+                        aggregate.low.precision,
+                        aggregate.mid.precision,
+                        aggregate.high.precision,
+                    )
+                )
+                output_file.write(
+                    "%s-F,%f,%f,%f\n"
+                    % (
+                        score_type,
+                        aggregate.low.fmeasure,
+                        aggregate.mid.fmeasure,
+                        aggregate.high.fmeasure,
+                    )
+                )
+                pbar.update()
+
+
+def _parallel_compute_and_write_scores(
+    target_filenames,
+    prediction_filenames,
+    scorer,
+    delimiter,
+    aggregator,
+    num_workers=mp.cpu_count() - 1,
+):
+    if len(target_filenames) < 1 or len(target_filenames) != len(
+        prediction_filenames
+    ):
+        raise ValueError(
+            "Must have equal and positive number of target and "
+            "prediction files. Found: %d target files, %d prediction "
+            "files." % (len(target_filenames), len(prediction_filenames))
+        )
+
+    manager = mp.Manager()
+    pool = mp.Pool(num_workers, maxtasksperchild=MAX_TASKS_PER_CHILD)
+
+    reading_queue = manager.Queue()
+    processing_queue = manager.Queue()
+    writing_queue = manager.Queue()
+
+    pool.apply_async(_writing_listener, [writing_queue])
 

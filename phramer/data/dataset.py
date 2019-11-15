@@ -1,4 +1,5 @@
 import json
+import logging
 import multiprocessing as mp
 import re
 from functools import partial
@@ -22,6 +23,7 @@ from phramer.config import (
 )
 from phramer.utils.file import count_lines, list_files
 
+logging.basicConfig(level=logging.INFO)
 nltk.download("stopwords")
 
 
@@ -30,6 +32,12 @@ class CNNDailyMail:
     Handler for CNN DailyMail dataset
     """
 
+    def __init__(self):
+        from nltk.stem import WordNetLemmatizer
+
+        self.lemmatizer = WordNetLemmatizer()
+        nltk.download("wordnet")
+
     def _fix_missing_period(self, line):
         if line == "":
             return line
@@ -37,17 +45,25 @@ class CNNDailyMail:
             return line
         return line + " ."
 
-    def _filter(self, line):
-        line = line.lower()
-        line = self._fix_missing_period(line)
-        return line
+    def _filter(self, text):
+        text = text.lower()
+        text = re.sub(r"https?:\/\/.*[\r\n]*", "", text, flags=re.MULTILINE)
+        text = re.sub(r'[_"\-;%()|.,+&=*%]', " ", text)
+        text = re.sub(r"\.", " . ", text)
+        text = re.sub(r"\!", " !", text)
+        text = re.sub(r"\?", " ?", text)
+        text = re.sub(r"\,", " ,", text)
+        text = re.sub(r":", " : ", text)
+        text = re.sub(r"#", " # ", text)
+        text = re.sub(r" . . . ", " ", text)
+        text = re.sub(r" .  .  . ", " ", text)
+        text = re.sub(r" ! ! ", " ! ", text)
+        text = self._fix_missing_period(text)
+        return text
 
     def _lemmatize(self, line):
-        from nltk.stem import WordNetLemmatizer
-
         english_stopwords = stopwords.words("english")
-        lemmatizer = WordNetLemmatizer()
-        tokens = lemmatizer.lemmatize(line)
+        tokens = self.lemmatizer.lemmatize(line).split(" ")
         tokens = [
             token
             for token in tokens
@@ -77,7 +93,7 @@ class CNNDailyMail:
                 article_lines.append(line)
 
         article = " ".join(article_lines)
-        summary = " ".join(
+        summary = " ".join(sent
             [
                 "{} {} {}".format(
                     CNNDM_SENTENCE_START, sent, CNNDM_SENTENCE_END
@@ -85,6 +101,8 @@ class CNNDailyMail:
                 for sent in highlight_lines
             ]
         )
+        article = article.replace("\n", " ")
+        summary = summary.replace("\n", " ")
         return article, summary
 
     def _read_text_file(self, filename):
@@ -94,30 +112,25 @@ class CNNDailyMail:
                 lines.append(line.strip())
         return lines
 
-    def _reading_listener(self, reading_queue, processing_queue):
-        while True:
-            message = reading_queue.get()
-            if message == PHRAMER_STOP_MESSAGE:
-                processing_queue.put(PHRAMER_STOP_MESSAGE)
-            processing_queue.put(self._read_text_file(message))
+    def _process_story(self, filename, writing_queue):
+        lines = self._read_text_file(filename)
+        data = self._parse_lines(lines)
+        writing_queue.put(data)
+        return data
 
-    def _writing_listener(
-        self, processing_queue, articles_fn, summaries_fn, num_total_stories
-    ):
+    def _writing_listener(self, writing_queue, articles_fn, summaries_fn):
         with open(articles_fn, "w") as articles, open(
             summaries_fn, "w"
         ) as summaries:
-            with tqdm(total=num_total_stories, desc="Stories") as pbar:
-                while True:
-                    message = processing_queue.get()
-                    if message == PHRAMER_STOP_MESSAGE:
-                        break
-                    article, summary = self._parse_lines(message)
-                    articles.write(str(article) + "\n")
-                    summaries.write(str(summary) + "\n")
-                    articles.flush()
-                    summaries.flush()
-                    pbar.update()
+            while True:
+                message = writing_queue.get()
+                if message == PHRAMER_STOP_MESSAGE:
+                    break
+                article, summary = message
+                articles.write(str(article) + "\n")
+                summaries.write(str(summary) + "\n")
+                articles.flush()
+                summaries.flush()
 
     def preprocess(
         self,
@@ -127,6 +140,9 @@ class CNNDailyMail:
         num_workers=mp.cpu_count() - 1,
         dataset_tag=CNNDM_TAG,
     ):
+        logging.info(
+            "Preparing to process the CNN dataset. This might take a while..."
+        )
         files = list_files(cnn_dir) + list_files(dm_dir)
         target_dir = Path(target_dir)
         target_dir.mkdir(parents=True, exist_ok=True)
@@ -136,6 +152,16 @@ class CNNDailyMail:
         target_summaries_path = target_dir / "{}.{}".format(
             dataset_tag, SUMMARIES_TAG
         )
+
+        logging.info(
+            "Processing {} CNN and DailyMail stories from {} and {} ".format(
+                len(files), cnn_dir, dm_dir
+            )
+            + "to {} and {}...".format(
+                target_articles_path, target_summaries_path
+            )
+        )
+
         if target_articles_path.exists() or target_summaries_path.exists():
             raise RuntimeError(
                 "Aborted the attempt to overwrite "
@@ -146,30 +172,25 @@ class CNNDailyMail:
 
         manager = mp.Manager()
         pool = mp.Pool(num_workers, maxtasksperchild=MAX_TASKS_PER_CHILD)
-
-        reading_queue = manager.Queue()
-        processing_queue = manager.Queue()
-
-        pool.apply_async(
-            self._reading_listener, [reading_queue, processing_queue]
-        )
+        logging.info("Started the writing queue...")
+        writing_queue = manager.Queue()
 
         pool.apply_async(
             self._writing_listener,
-            [
-                processing_queue,
-                target_articles_path,
-                target_summaries_path,
-                len(files),
-            ],
+            [writing_queue, target_articles_path, target_summaries_path],
         )
-        for filename in files:
-            reading_queue.put(filename)
 
-        reading_queue.put(PHRAMER_STOP_MESSAGE)
+        with tqdm(total=len(files), desc="Raw texts read") as pbar:
+            for _ in pool.imap_unordered(
+                partial(self._process_story, writing_queue=writing_queue),
+                files,
+            ):
+                pbar.update()
+
+        writing_queue.put(PHRAMER_STOP_MESSAGE)
 
         pool.close()
-        pool.terminate()
+        pool.join()
 
 
 class GigawordDataset:
@@ -304,5 +325,5 @@ class RIANewsDataset:
                     pbar.update()
         queue.put(PHRAMER_STOP_MESSAGE)
         pool.close()
-        pool.terminate()
-        print("Finished processing the RIA dataset.")
+        pool.join()
+        logging.info("Finished processing the RIA dataset.")

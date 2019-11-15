@@ -10,6 +10,7 @@ import collections
 import numpy as np
 import six
 
+
 class Score(
     collections.namedtuple("Score", ["precision", "recall", "fmeasure"])
 ):
@@ -41,34 +42,34 @@ class AggregateScore(
 class BootstrapAggregator(object):
     """Aggregates scores to provide confidence intervals.
 
-  Sample usage:
-    scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'])
-    aggregator = Aggregator()
-    aggregator.add_scores(scorer.score("one two three", "one two"))
-    aggregator.add_scores(scorer.score("one two five six", "seven eight"))
-    result = aggregator.aggregate()
-    print result
-    {'rougeL': AggregateScore(
-         low=Score(precision=0.0, recall=0.0, fmeasure=0.0),
-         mid=Score(precision=0.5, recall=0.33, fmeasure=0.40),
-         high=Score(precision=1.0, recall=0.66, fmeasure=0.80)),
-     'rouge1': AggregateScore(
-         low=Score(precision=0.0, recall=0.0, fmeasure=0.0),
-         mid=Score(precision=0.5, recall=0.33, fmeasure=0.40),
-         high=Score(precision=1.0, recall=0.66, fmeasure=0.80))}
-  """
+    Sample usage:
+      scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'])
+      aggregator = Aggregator()
+      aggregator.add_scores(scorer.score("one two three", "one two"))
+      aggregator.add_scores(scorer.score("one two five six", "seven eight"))
+      result = aggregator.aggregate()
+      print result
+      {'rougeL': AggregateScore(
+           low=Score(precision=0.0, recall=0.0, fmeasure=0.0),
+           mid=Score(precision=0.5, recall=0.33, fmeasure=0.40),
+           high=Score(precision=1.0, recall=0.66, fmeasure=0.80)),
+       'rouge1': AggregateScore(
+           low=Score(precision=0.0, recall=0.0, fmeasure=0.0),
+           mid=Score(precision=0.5, recall=0.33, fmeasure=0.40),
+           high=Score(precision=1.0, recall=0.66, fmeasure=0.80))}
+    """
 
     def __init__(self, confidence_interval=0.95, n_samples=1000):
         """Initializes a BootstrapAggregator object.
 
-    Args:
-      confidence_interval: Confidence interval to compute on the mean as a
-        decimal.
-      n_samples: Number of samples to use for bootstrap resampling.
+        Args:
+          confidence_interval: Confidence interval to compute on the mean as a
+            decimal.
+          n_samples: Number of samples to use for bootstrap resampling.
 
-    Raises:
-      ValueError: If invalid argument is given.
-    """
+        Raises:
+          ValueError: If invalid argument is given.
+        """
 
         if confidence_interval < 0 or confidence_interval > 1:
             raise ValueError("confidence_interval must be in range [0, 1]")
@@ -82,10 +83,10 @@ class BootstrapAggregator(object):
     def add_scores(self, scores):
         """Adds a sample for future aggregation.
 
-    Args:
-      scores: Dict mapping score_type strings to a namedtuple object/class
-        representing a score.
-    """
+        Args:
+          scores: Dict mapping score_type strings to a namedtuple object/class
+            representing a score.
+        """
 
         for score_type, score in six.iteritems(scores):
             self._scores[score_type].append(score)
@@ -93,9 +94,9 @@ class BootstrapAggregator(object):
     def aggregate(self):
         """Aggregates scores previously added using add_scores.
 
-    Returns:
-      A dict mapping score_type to AggregateScore objects.
-    """
+        Returns:
+          A dict mapping score_type to AggregateScore objects.
+        """
 
         result = {}
         for score_type, scores in six.iteritems(self._scores):
