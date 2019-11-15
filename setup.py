@@ -8,6 +8,7 @@ requirements = [
     "comet-ml==2.0.16",
     "bs4==0.0.1",
     "tqdm==4.37.0",
+    "google-cloud-storage==1.19.0",
     "nltk",
     "numpy",
     "six",
