@@ -41,7 +41,7 @@ dvc pull data.dvc
 To continue our work you should make your own DVC remote storage to store your data and models.
 It may be local storage on you machine or any other cloud service (see [dvc docs](https://dvc.org/doc/command-reference/remote/add)).
 
-Take a look to our instructions in `howto` section [here][remote_storage] to create remote storage.
+Take a look to our instructions in `howto` section [here](#set-up-remote-storage) to create remote storage.
 
 Then *push* your data to the storage by running following command:
 ```bash
@@ -49,11 +49,9 @@ dvc push
 ```
 
 ## Datasets
-1. [Gigaword dataset](https://drive.google.com/open?id=0B6N7tANPyVeBNmlSX19Ld2xDU1E)
-2. [CNN and Daily Mail datasets](https://cs.nyu.edu/~kcho/DMQA/)
-    You should download *stories* for *CNN* and *Daily Mail*.
-3. [RIA News]('https://github.com/RossiyaSegodnya/ria_news_dataset')
-    You should download *ria.json.gz* from github repo.
+1. [Gigaword](https://drive.google.com/open?id=0B6N7tANPyVeBNmlSX19Ld2xDU1E) dataset;
+2. [CNN](https://drive.google.com/uc?export=download&id=0BwmD_VLjROrfTHk4NFg2SndKcjQ) and [Daily Mail](https://drive.google.com/uc?export=download&id=0BwmD_VLjROrfM1BxdkxVaTY2bWs) datasets;
+3. [RIA News](https://github.com/RossiyaSegodnya/ria_news_dataset/blob/master/ria.json.gz) dataset.
 
 ## Setting up a custom DVC project
 Here is instruction how to create you own DVC project by yourself.
@@ -64,8 +62,8 @@ Here is instruction how to create you own DVC project by yourself.
     # git commit -m "Initialize DVC project"
     ```
 
-[remote_storage]:
-2. Set up remote storage (similar to the way you use Git server to store and share your code):
+2. ##### Set up remote storage
+    Similar to the way you use Git server to store and share your code.
     * Local Storage
         ```bash
         dvc remote add -d localremote /tmp/dvc-storage
