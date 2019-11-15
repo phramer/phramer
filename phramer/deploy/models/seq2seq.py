@@ -1,10 +1,11 @@
 import torch
+from types import SimpleNamespace
 
-from collections import namedtuple
 import numpy as np
 import sys
 from fairseq import data, options, tasks, tokenizer, utils
 from fairseq.sequence_generator import SequenceGenerator
+
 
 
 from phramer.data.dataset import RIANewsDataset
@@ -13,11 +14,6 @@ from phramer.deploy.models_config.ria_seq2seq import (
     CHECKPOINT_PATH,
     DATASET_NAME,
     INPUT_FILE_NAME,
-    REMOVE_BPE,
-    MIN_LEN,
-    BEAM,
-    NO_REPEAT_NGRAM,
-    NBEST,
     CUDA_VISIBLE_DEVICES
 )
 
@@ -73,6 +69,8 @@ class Seq2SeqModel:
     """
 
     def __init__(self):
+        args = self.build_args()
+
         if args.buffer_size < 1:
             args.buffer_size = 1
         if args.max_tokens is None and args.max_sentences is None:
@@ -183,12 +181,61 @@ class Seq2SeqModel:
 
 
     def build_args(self):
-        Args = namedtuple("Args", ['max_tokens', 'max_sentences', 'buffer_size', 'sampling', 'nbest', 'beam', \
-                                   'print_alignment', 'cpu', 'path', 'model_overrides', 'no_beamable_mm', \
-                                   'fp16', 'min_len', 'no_early_stop', 'unnormalized', 'lenpen', 'unkpen', \
-                                   'sampling', 'sampling_topk', 'sampling_temperature', 'diverse_beam_groups', \
-                                   'diverse_beam_strength', 'no_repeat_ngram_size', 'replace_unk', 'remove_bpe', \
-                                   'max_len_a', 'max_len_b'])
+        fields = ['max_tokens', 'max_sentences', 'buffer_size', 'sampling', 'nbest', 'beam', \
+                'print_alignment', 'cpu', 'path', 'model_overrides', 'no_beamable_mm', \
+                'fp16', 'min_len', 'no_early_stop', 'unnormalized', 'lenpen', 'unkpen', \
+                'sampling_topk', 'sampling_temperature', 'diverse_beam_groups', \
+                'diverse_beam_strength', 'no_repeat_ngram_size', 'replace_unk', 'remove_bpe', \
+                'max_len_a', 'max_len_b', 'task', 'left_pad_source', 'left_pad_target', \
+                'source_lang', 'target_lang', 'data', 'fp16_init_scale', 'fp16_scale_window', \
+                'gen_subset', 'input', 'log_format', 'log_interval', 'max_source_positions', \
+                'max_target_positions', 'no_progress_bar', 'num_shards', 'prefix_size', \
+                'quiet', 'score_reference', 'seed', 'shard_id', 'skip_invalid_size_inputs_valid_test', \
+                'upsample_primary']
 
-        args = Args()
+        defaults_dict = dict(zip(fields, (None,) * len(fields)))
+        defaults_dict['buffer_size'] = 0
+        defaults_dict['beam'] = 5
+        defaults_dict['nbest'] = 1
+        defaults_dict['max_len_a'] = 0
+        defaults_dict['max_len_b'] = 200
+        defaults_dict['min_len'] = 1
+        defaults_dict['no_early_stop'] = False
+        defaults_dict['unnormalized'] = False
+        defaults_dict['no_beamable_mm'] = False
+        defaults_dict['lenpen'] = 1
+        defaults_dict['unkpen'] = 0
+        defaults_dict['no_repeat_ngram_size'] = 0
+        defaults_dict['sampling'] = False
+        defaults_dict['sampling_topk'] = 1
+        defaults_dict['sampling_temperature'] = 1
+        defaults_dict['diverse_beam_groups'] = 1
+        defaults_dict['diverse_beam_strength'] = 0.5
+        defaults_dict['print_alignment'] = False
+        defaults_dict['cpu'] = False
+        defaults_dict['fp16'] = False
+        defaults_dict['task'] = 'translation'
+        defaults_dict['left_pad_source'] = True
+        defaults_dict['left_pad_target'] = False
+        defaults_dict['fp16_init_scale'] = 128
+        defaults_dict['log_interval'] = 1000
+        defaults_dict['max_source_positions'] = 1024
+        defaults_dict['max_target_positions'] = 1024
+        defaults_dict['model_overrides'] = '{}'
+        defaults_dict['no_progress_bar'] = False
+        defaults_dict['num_shards'] = 1
+        defaults_dict['prefix_size'] = 0
+        defaults_dict['quiet'] = False
+        defaults_dict['score_reference'] = False
+        defaults_dict['seed'] = 1
+        defaults_dict['shard_id'] = 0
+        defaults_dict['skip_invalid_size_inputs_valid_test'] = False
+        defaults_dict['upsample_primary'] = 1
+
+
+        args = SimpleNamespace(**defaults_dict)
+
+        args.data = DATA_PATH
+        args.path = CHECKPOINT_PATH
+        args.input = INPUT_FILE_NAME
         return args
