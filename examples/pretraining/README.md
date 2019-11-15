@@ -7,17 +7,17 @@
 To train the language model we used RIA dataset.
 
 ### Pretraining language model:
-To preprocess the data:
+The first step is to preprocess our data. To preprocess the data:
 ```
 fairseq-preprocess --only-source \
         --trainpref ${DATA_DIR}/ria.articles.train \
         --validpref ${DATA_DIR}/ria.articles.valid \
         --testpref ${DATA_DIR}/ria.articles.test \
-        --destdir ${DATA_DIR}/data-bin/ \
+        --destdir ${DATA_DIR}/data-bin \
         --workers 50 \
 ```
 
-To train the language model:
+The second step is to train a language model. ${LM_DATA} has to point to a folder with processed monolingual dataset (${DATA_DIR}/data-bin). To train the language model:
 ```
 fairseq-train ${LM_DATA} -a bi_transformer_lm_big --clip-norm 0.1 --lr 0.0001 --dropout 0.1 \
            --max-tokens 750 --no-progress-bar --log-interval 1 --criterion cross_entropy --fp16 \
