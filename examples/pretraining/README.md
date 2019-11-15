@@ -1,12 +1,12 @@
 # Pre-training for abstractive summarization
 
-> Currently fairseq doesn't have pre-training code for abstractive summarization in master branch.  ***In order to use all the code provided here please run the following command:***\
+ Currently fairseq doesn't have pre-training code for abstractive summarization in master branch.  ***In order to use all the code provided here please run the following command:***\
 ```pip install git+git@github.com:phramer/fairseq.git@phramer_bi_trans_lm```
 
 
-To train the language model we used RIA dataset.
 
 ### Pretraining language model:
+To train the language model we used RIA dataset.
 The first step is to preprocess our data. To preprocess the data:
 ```
 fairseq-preprocess --only-source \
