@@ -1,19 +1,23 @@
 import torch
+
 from types import SimpleNamespace
 
 import numpy as np
 import sys
 from fairseq import data, options, tasks, tokenizer, utils
 from fairseq.sequence_generator import SequenceGenerator
-
-
-
 from phramer.data.dataset import RIANewsDataset
 from phramer.deploy.models_config.ria_seq2seq import (
     DATA_PATH,
     CHECKPOINT_PATH,
+    LM_CHECKPOINT_PATH,
     DATASET_NAME,
     INPUT_FILE_NAME,
+    REMOVE_BPE,
+    MIN_LEN,
+    BEAM,
+    NO_REPEAT_NGRAM,
+    NBEST,
     CUDA_VISIBLE_DEVICES
 )
 
@@ -71,6 +75,7 @@ class Seq2SeqModel:
     def __init__(self):
         args = self.build_args()
 
+
         if args.buffer_size < 1:
             args.buffer_size = 1
         if args.max_tokens is None and args.max_sentences is None:
@@ -92,6 +97,8 @@ class Seq2SeqModel:
         print('| loading model(s) from {}'.format(args.path))
         model_paths = args.path.split(':')
         models, model_args = utils.load_ensemble_for_inference(model_paths, task, model_arg_overrides=eval(args.model_overrides))
+        
+        print("MODEL ARGS:", model_args)
 
         # Set dictionaries
         tgt_dict = task.target_dictionary
@@ -180,6 +187,7 @@ class Seq2SeqModel:
         print('| Type the input sentence and press return:')
 
 
+
     def build_args(self):
         fields = ['max_tokens', 'max_sentences', 'buffer_size', 'sampling', 'nbest', 'beam', \
                 'print_alignment', 'cpu', 'path', 'model_overrides', 'no_beamable_mm', \
@@ -191,7 +199,7 @@ class Seq2SeqModel:
                 'gen_subset', 'input', 'log_format', 'log_interval', 'max_source_positions', \
                 'max_target_positions', 'no_progress_bar', 'num_shards', 'prefix_size', \
                 'quiet', 'score_reference', 'seed', 'shard_id', 'skip_invalid_size_inputs_valid_test', \
-                'upsample_primary']
+                'upsample_primary', 'encoder_embed_path']
 
         defaults_dict = dict(zip(fields, (None,) * len(fields)))
         defaults_dict['buffer_size'] = 0
@@ -207,7 +215,7 @@ class Seq2SeqModel:
         defaults_dict['unkpen'] = 0
         defaults_dict['no_repeat_ngram_size'] = 0
         defaults_dict['sampling'] = False
-        defaults_dict['sampling_topk'] = 1
+        defaults_dict['sampling_topk'] = -1
         defaults_dict['sampling_temperature'] = 1
         defaults_dict['diverse_beam_groups'] = 1
         defaults_dict['diverse_beam_strength'] = 0.5
@@ -231,11 +239,13 @@ class Seq2SeqModel:
         defaults_dict['shard_id'] = 0
         defaults_dict['skip_invalid_size_inputs_valid_test'] = False
         defaults_dict['upsample_primary'] = 1
-
-
+        
         args = SimpleNamespace(**defaults_dict)
-
-        args.data = DATA_PATH
+        
+        args.source_lang = 'articles'
+        args.target_lang = 'summaries'
+        args.data = [DATA_PATH]
         args.path = CHECKPOINT_PATH
+        args.encoder_embed_path = LM_CHECKPOINT_PATH
         args.input = INPUT_FILE_NAME
         return args

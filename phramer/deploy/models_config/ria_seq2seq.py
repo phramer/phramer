@@ -1,6 +1,7 @@
 FAIRSEQ_PATH='/home/pavel_fakanov/fairseq'
 DATA_PATH='/home/pavel_fakanov/data/ria_seq2seq/data-bin/'
-CHECKPOINT_PATH='/home/pavel_fakanov/checkpoints/ria_seq2seq'
+CHECKPOINT_PATH='/home/pavel_fakanov/checkpoints/ria_seq2seq/checkpoint_best.pt'
+LM_CHECKPOINT_PATH='/home/pavel_fakanov/checkpoints/ria_lm/checkpoints_best.pt'
 DATASET_NAME='ria'
 INPUT_FILE_NAME='data.txt'
 REMOVE_BPE=True
