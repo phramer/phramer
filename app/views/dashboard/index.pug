@@ -1,0 +1,62 @@
+extends ../layout
+
+mixin request_form
+  form.form-horizontal(method='POST')
+    label(for='exampleFormControlSelect1').font-weight-bold 
+      .row.align-items-center
+        h5.col.align-items-center
+          | Source text 
+        h5.col
+          button#start-demo.btn.btn-light(type='submit')
+            i.fa.fa-envelope
+            | Start processing
+    input(type='hidden', name='_csrf', value=_csrf)
+    .form-group.row.justify-content-start
+      .col
+        textarea.form-control(name='article', id='article', rows='11')
+    .form-group.row
+      .col
+
+block content
+  .row
+    .col-sm-3.pr-0
+      h2 Levenshtein Demo 
+  .row
+    .alert.alert-info.w-100
+      p.font-weight-bold.mb-0 Please submit a short text for summarization. For better results, use news-like stories. 
+  .row
+    .col
+      +request_form("Article")
+    .col
+      p Viz
+  .row
+    .col
+      .card#first-card
+        .card-header.align-items-center.bg-light.px-0
+          .row.align-items-center.justify-content-center.mt-3
+            p Levenshtein on 
+            .col-sm-4
+              .form-group
+               select#first-dataset-selection.form-control
+                 option Gigaword 
+                 //- option CNN/DailyMail 
+                 option RIA News 
+        .card-body.invisible
+    .col
+      .card#second-card
+        .card-header.align-items-center.bg-light.px-0
+          .row.align-items-center.justify-content-center.mt-3
+            .col-sm-5
+              .form-group
+               select#second-model-selection.form-control
+                 option ELMO pre-trained
+                 option Levenshtein
+                 option Seq2seq
+            p on
+            .col-sm-4
+              .form-group
+               select#second-dataset-selection.form-control
+                 option Gigaword 
+                 option CNN/DailyMail 
+                 option RIA News 
+        .card-body.invisible

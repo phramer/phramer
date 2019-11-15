@@ -10,7 +10,7 @@ import { SESSION_SECRET } from "./util/secrets";
 // Controllers (route handlers)
 import * as homeController from "./controllers/home";
 import * as apiController from "./controllers/api";
-
+import * as dashboardController from "./controllers/dashboard";
 // Create Express server
 const app = express();
 
@@ -58,11 +58,6 @@ app.use(
 /**
  * Primary app routes.
  */
-app.get("/", homeController.index);
-
-/**
- * API examples routes.
- */
-app.get("/api", apiController.getApi);
+app.get("/", dashboardController.getDashboard);
 
 export default app;
