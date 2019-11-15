@@ -6,10 +6,10 @@ To train the language model we used RIA dataset.
 To preprocess the data:
 ```
 fairseq-preprocess --only-source \
-        --trainpref $DATA_DIR/ria.articles.train \
-        --validpref $DATA_DIR/ria.articles.valid \
-        --testpref $DATA_DIR/ria.articles.test \
-        --destdir $DATA_DIR/data-bin/ \
+        --trainpref ${DATA_DIR}/ria.articles.train \
+        --validpref ${DATA_DIR}/ria.articles.valid \
+        --testpref ${DATA_DIR}/ria.articles.test \
+        --destdir ${DATA_DIR}/data-bin/ \
         --workers 50 \
 ```
 
@@ -47,7 +47,7 @@ fairseq-train  ${DATA_PATH} \
            --criterion label_smoothed_cross_entropy --label-smoothing 0.1 --update-freq 4 --attention-dropout 0.2 \
            --elmo-dropout 0.2 --max-tokens 1000 --arch transformer_wmt_en_de --seed 1 --warmup-init-lr 1e-7 \
            --encoder-embed-path elmo:${LM_CHECKPOINT_PATH}/checkpoint_best.pt --source-lang articles --target-lang summaries \
-           --save-interval-updates 300 --keep-interval-updates 5 --save-dir $CHECKPOINT_PATH --comet-logging \
+           --save-interval-updates 300 --keep-interval-updates 5 --save-dir ${CHECKPOINT_PATH} --comet-logging \
 ```
 
 
