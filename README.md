@@ -41,7 +41,7 @@ dvc pull data.dvc
 To continue our work you should make your own DVC remote storage to store your data and models.
 It may be local storage on you machine or any other cloud service (see [dvc docs](https://dvc.org/doc/command-reference/remote/add)).
 
-Take a look to our instructions in `howto` section [here](#-setting-up-a-custom-dvc-project) to create remote storage.
+Take a look to our instructions in `howto` section [here](#set-up-remote-storage) to create remote storage.
 
 Then *push* your data to the storage by running following command:
 ```bash
@@ -64,7 +64,8 @@ Here is instruction how to create you own DVC project by yourself.
     # git commit -m "Initialize DVC project"
     ```
 
-2. Set up remote storage (similar to the way you use Git server to store and share your code):
+2. ##### Set up remote storage
+    Similar to the way you use Git server to store and share your code.
     * Local Storage
         ```bash
         dvc remote add -d localremote /tmp/dvc-storage
