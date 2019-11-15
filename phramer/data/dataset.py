@@ -75,14 +75,11 @@ class CNNDailyMail:
         text = re.sub(" +", " ", text)
         return text
 
-    def _process_line(self, line):
-        return self._lemmatize(self._filter(line))
-
     def _parse_lines(self, lines):
         article_lines = []
         highlight_lines = []
         next_is_highlight = False
-        for line in map(self._process_line, lines):
+        for line in map(self._filter, lines):
             if line == "":
                 continue
             elif line.startswith("@highlight"):
@@ -92,8 +89,8 @@ class CNNDailyMail:
             else:
                 article_lines.append(line)
 
-        article = " ".join(article_lines)
-        summary = " ".join(sent
+        article = self._lemmatize(" ".join(article_lines))
+        summary = " ".join(
             [
                 "{} {} {}".format(
                     CNNDM_SENTENCE_START, sent, CNNDM_SENTENCE_END
@@ -101,8 +98,10 @@ class CNNDailyMail:
                 for sent in highlight_lines
             ]
         )
-        article = article.replace("\n", " ")
-        summary = summary.replace("\n", " ")
+        article = article.replace("\n", "")
+        summary = summary.replace("\n", "")
+        article = re.sub(" +", " ", article)
+        summary = re.sub(" +", " ", summary)
         return article, summary
 
     def _read_text_file(self, filename):
