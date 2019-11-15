@@ -11,6 +11,8 @@ from tqdm import tqdm
 from phramer.config import MAX_TASKS_PER_CHILD
 from phramer.utils.file import count_lines
 
+logging.basicConfig(level=logging.INFO)
+
 
 def compute_scores_and_write_to_csv(
     target_filepattern,
@@ -19,7 +21,7 @@ def compute_scores_and_write_to_csv(
     scorer,
     aggregator,
     delimiter="\n",
-    **kwargs
+    num_workers=mp.cpu_count() - 1,
 ):
     """Runs aggregate score calculations and outputs results to a CSV file.
 
@@ -33,7 +35,6 @@ def compute_scores_and_write_to_csv(
          delimiter: Record delimiter.
      """
 
-    num_workers = getattr(kwargs, "num_workers", mp.cpu_count() - 1)
     target_filenames = _glob(target_filepattern)
     prediction_filenames = _glob(prediction_filepattern)
     if num_workers <= 0:
@@ -57,6 +58,7 @@ def compute_scores_and_write_to_csv(
         _parallel_compute_and_write_scores(
             target_filenames,
             prediction_filenames,
+            output_filename,
             scorer,
             delimiter,
             aggregator,
@@ -215,7 +217,7 @@ def _write_scores_to_csv(output_filename, scores):
     logging.info("Finished writing results.")
 
 
-def _process_lines(lines, scorer, aggregator):
+def _process_lines(lines, scorer):
     target_line, prediction_line = lines
     if target_line is None or prediction_line is None:
         raise ValueError(
@@ -223,7 +225,6 @@ def _process_lines(lines, scorer, aggregator):
             + "and prediction files."
         )
     score = scorer.score(target_line, prediction_line)
-    aggregator.add(score)
     return score
 
 
@@ -255,9 +256,11 @@ def _parallel_compute_and_write_scores(
         targets = _record_gen(target_filename, delimiter)
         preds = _record_gen(prediction_filename, delimiter)
         with tqdm(total=count_lines(target_filename), desc="Lines") as pbar:
-            for _ in pool.imap_unordered(
-                partial(_process_lines, scorer=scorer, aggregator=aggregator),
-                zip_longest(targets, preds),
+            for score in pool.imap_unordered(
+                partial(_process_lines, scorer=scorer), zip(targets, preds)
             ):
+                aggregator.add_scores(score)
                 pbar.update()
-    _write_aggregates_to_csv(output_filename, aggregator)
+    pool.close()
+    pool.join()
+    _write_aggregates_to_csv(output_filename, aggregator.aggregate())

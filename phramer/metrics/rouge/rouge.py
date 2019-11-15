@@ -24,6 +24,7 @@ import argparse
 from phramer.metrics.rouge import io
 from phramer.metrics.rouge import rouge_scorer
 from phramer.metrics.rouge import scoring
+import multiprocessing as mp
 
 
 def main(args):
@@ -36,6 +37,7 @@ def main(args):
         scorer,
         aggregator,
         delimiter=args.delimiter,
+        num_workers=args.num_workers,
     )
 
 
@@ -73,7 +75,6 @@ if __name__ == "__main__":
         nargs="+",
         type=str,
         default=["rouge1", "rouge2", "rougeL"],
-        required=True,
         help="List of ROUGE types to calculate.",
     )
     parser.add_argument(
@@ -88,5 +89,12 @@ if __name__ == "__main__":
         default=True,
         help="Write aggregates if this is set to True",
     )
+    parser.add_argument(
+        "--num-workers",
+        type=int,
+        default=mp.cpu_count() - 1,
+        help="The number of workers for processing",
+    )
     args = parser.parse_args()
+    print
     main(args)

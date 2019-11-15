@@ -179,13 +179,14 @@ class CNNDailyMail:
             [writing_queue, target_articles_path, target_summaries_path],
         )
 
-        with tqdm(total=len(files), desc="Raw texts read") as pbar:
+        with tqdm(total=len(files), desc="Processed texts") as pbar:
             for _ in pool.imap_unordered(
                 partial(self._process_story, writing_queue=writing_queue),
                 files,
             ):
                 pbar.update()
 
+        logging.info("Finished processing the files...")
         writing_queue.put(PHRAMER_STOP_MESSAGE)
 
         pool.close()
