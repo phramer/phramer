@@ -51,7 +51,7 @@ dvc push
 ## Datasets
 1. [Gigaword](https://drive.google.com/open?id=0B6N7tANPyVeBNmlSX19Ld2xDU1E) dataset;
 2. [CNN](https://drive.google.com/uc?export=download&id=0BwmD_VLjROrfTHk4NFg2SndKcjQ) and [Daily Mail](https://drive.google.com/uc?export=download&id=0BwmD_VLjROrfM1BxdkxVaTY2bWs) datasets;
-3. [RIA News]('https://github.com/RossiyaSegodnya/ria_news_dataset') dataset.
+3. [RIA News](https://github.com/RossiyaSegodnya/ria_news_dataset/blob/master/ria.json.gz) dataset.
 
 ## Setting up a custom DVC project
 Here is instruction how to create you own DVC project by yourself.
