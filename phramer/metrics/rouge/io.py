@@ -1,13 +1,15 @@
 """Library for reading/writing input and score files."""
-
-from tqdm import tqdm
 import glob
 import logging
 import multiprocessing as mp
+from functools import partial
 
 import six
 from six.moves import zip, zip_longest
-from phramer.config import MAX_TASKS_PER_CHILD, PHRAMER_STOP_MESSAGE
+from tqdm import tqdm
+
+from phramer.config import MAX_TASKS_PER_CHILD
+from phramer.utils.file import count_lines
 
 
 def compute_scores_and_write_to_csv(
@@ -47,6 +49,11 @@ def compute_scores_and_write_to_csv(
         else:
             _write_scores_to_csv(output_filename, scores)
     else:
+        if aggregator is None:
+            raise NotImplementedError(
+                "Computing per-example values in the parallel "
+                + "environment is not supported."
+            )
         _parallel_compute_and_write_scores(
             target_filenames,
             prediction_filenames,
@@ -81,8 +88,10 @@ def _compute_scores(target_filenames, prediction_filenames, scorer, delimiter):
     """Computes aggregates scores across the given target and prediction files.
 
     Args:
-      target_filenames: List of filenames from which to read target lines.
-      prediction_filenames: List of filenames from which to read prediction lines.
+      target_filenames: 
+        List of filenames from which to read target lines.
+      prediction_filenames: 
+        List of filenames from which to read prediction lines.
       scorer: A BaseScorer object to compute scores.
       delimiter: string delimiter between each record in input files
     Returns:
@@ -206,67 +215,22 @@ def _write_scores_to_csv(output_filename, scores):
     logging.info("Finished writing results.")
 
 
-def _reading_listener(reading_queue, processing_queue, delimiter):
-    while True:
-        message = reading_queue.get()
-        if message == PHRAMER_STOP_MESSAGE:
-            processing_queue.put(PHRAMER_STOP_MESSAGE)
-            break
-
-        target_filename, prediction_filename = message
-        targets = _record_gen(target_filename, delimiter)
-        preds = _record_gen(prediction_filename, delimiter)
-        
-        processing_queue.put(_record_gen(message, delimiter))
-
-
-def _processing_listener(processing_queue, writing_queue, aggregator):
-    while True:
-        message = processing_queue.get()
-        if message == PHRAMER_STOP_MESSAGE:
-            writing_queue.put(PHRAMER_STOP_MESSAGE)
-            break
-        writing_queue.put(_record_gen(message, delimiter))
-
-
-def _writing_listener(output_filename, writing_queue, num_messages):
-    with open(output_filename, "w") as output_file:
-        with tqdm(total=num_messages, desc="Writes") as pbar:
-            output_file.write("score_type,low,mid,high\n")
-            for score_type, aggregate in sorted(aggregates.items()):
-                output_file.write(
-                    "%s-R,%f,%f,%f\n"
-                    % (
-                        score_type,
-                        aggregate.low.recall,
-                        aggregate.mid.recall,
-                        aggregate.high.recall,
-                    )
-                )
-                output_file.write(
-                    "%s-P,%f,%f,%f\n"
-                    % (
-                        score_type,
-                        aggregate.low.precision,
-                        aggregate.mid.precision,
-                        aggregate.high.precision,
-                    )
-                )
-                output_file.write(
-                    "%s-F,%f,%f,%f\n"
-                    % (
-                        score_type,
-                        aggregate.low.fmeasure,
-                        aggregate.mid.fmeasure,
-                        aggregate.high.fmeasure,
-                    )
-                )
-                pbar.update()
+def _process_lines(lines, scorer, aggregator):
+    target_line, prediction_line = lines
+    if target_line is None or prediction_line is None:
+        raise ValueError(
+            "Must have equal number of lines across target "
+            + "and prediction files."
+        )
+    score = scorer.score(target_line, prediction_line)
+    aggregator.add(score)
+    return score
 
 
 def _parallel_compute_and_write_scores(
     target_filenames,
     prediction_filenames,
+    output_filename,
     scorer,
     delimiter,
     aggregator,
@@ -281,12 +245,19 @@ def _parallel_compute_and_write_scores(
             "files." % (len(target_filenames), len(prediction_filenames))
         )
 
-    manager = mp.Manager()
     pool = mp.Pool(num_workers, maxtasksperchild=MAX_TASKS_PER_CHILD)
 
-    reading_queue = manager.Queue()
-    processing_queue = manager.Queue()
-    writing_queue = manager.Queue()
-
-    pool.apply_async(_writing_listener, [writing_queue])
-
+    for target_filename, prediction_filename in zip(
+        sorted(target_filenames), sorted(prediction_filenames)
+    ):
+        logging.info("Reading targets from %s.", target_filename)
+        logging.info("Reading predictions from %s.", prediction_filename)
+        targets = _record_gen(target_filename, delimiter)
+        preds = _record_gen(prediction_filename, delimiter)
+        with tqdm(total=count_lines(target_filename), desc="Lines") as pbar:
+            for _ in pool.imap_unordered(
+                partial(_process_lines, scorer=scorer, aggregator=aggregator),
+                zip_longest(targets, preds),
+            ):
+                pbar.update()
+    _write_aggregates_to_csv(output_filename, aggregator)
