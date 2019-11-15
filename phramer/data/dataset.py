@@ -146,7 +146,7 @@ class CNNDailyMail:
         dm_dir: the directory with Daily Mail stories
         target_dir: the directory where to save preprocessed data
         num_workers: the number of parallel workers in the pool (default: all cpus but one)
-        dataset_tag: the file tag for the dataset (affects on the target path) 
+        dataset_tag: the file tag for the dataset (affects the target path) 
                      (default: cnndm)
     """
         logging.info(
@@ -297,18 +297,15 @@ class RIANewsDataset:
         dataset_tag=RIA_DATASET_TAG,
     ):
     """
-    Preprocessing the RIA news dataset.
+    Parses and cleans up the RIA news dataset into separate files for stories and titles.
 
     Args:
-        source_filename: filename with news
-        target_dir: directory to save the data
-        num_workers: number of cpus to process the dataset
-                     (default: all available CPUs)
-        should_lemmatize: flag if lemmatizer is on
-                          (default: True)
-        dataset_tag: tag of dataset (affects on target files)
-                     (default: see phramer/phramer/config.py:RIA_DATASET_TAG)
-
+        source_filename: the file with line-by-line json representation of the data
+        target_dir: the target directory for the files
+        num_workers: the number of workers in the pool (default: all CPUs but one)
+        should_lemmatize: whether to lemmatize the words (default: True)
+        dataset_tag: the file tag for the dataset (affects the target path) 
+                     (default: ria)
     """
         target_dir = Path(target_dir)
         target_dir.mkdir(parents=True, exist_ok=True)
