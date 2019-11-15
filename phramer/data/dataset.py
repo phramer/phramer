@@ -139,16 +139,15 @@ class CNNDailyMail:
         dataset_tag=CNNDM_TAG,
     ):
     """
-    Preprocessing the CNN and DailyMail stories.
+    Cleans the CNN/DM stories up and separates the highlights into a separate file. 
 
     Args:
-        cnn_dir: directory with CNN data
-        dm_dir: directory with Daily Mail data
-        target_dir: directory to save preprocessed data
-        num_workers: number of cpu to make work
-                     (default: all available cpus)
-        dataset_tag: tag of dataset (affects on the target path)
-                     (default: see phramer/phramer/config.py:CNNDM_TAG)
+        cnn_dir: the directory with CNN stories
+        dm_dir: the directory with Daily Mail stories
+        target_dir: the directory where to save preprocessed data
+        num_workers: the number of parallel workers in the pool (default: all cpus but one)
+        dataset_tag: the file tag for the dataset (affects on the target path) 
+                     (default: cnndm)
     """
         logging.info(
             "Preparing to process the CNN dataset. This might take a while..."
