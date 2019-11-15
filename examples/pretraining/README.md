@@ -5,7 +5,7 @@
 
 
 
-### Pretraining language model:
+### Pre-training language model:
 To train the language model we used RIA dataset.
 The first step is to preprocess our data. To preprocess the data:
 ```
