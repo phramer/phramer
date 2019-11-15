@@ -2,6 +2,7 @@
 
 To train the language model we used RIA dataset.
 
+#### Pretraining language model
 To preprocess the data:
 ```
 fairseq-preprocess --only-source \
@@ -23,8 +24,19 @@ fairseq-train ${LM_DATA} -a bi_transformer_lm_big --clip-norm 0.1 --lr 0.0001 --
            --save-dir ${LM_CHECKPOINT_PATH} --task language_modeling --comet-logging \
 ```
 
-To train a final seq2seq model:
+#### Training a final seq2seq model
+To preprocess the data:
+```
+fairseq-preprocess -source-lang articles \
+           --target-lang summaries \
+           --trainpref ${DATA_PATH}/train.ria \
+           --validpref ${DATA_PATH}/valid.ria \
+           --testpref ${DATA_PATH}/test.ria \
+           --destdir ${DEST_DIR} \
+           --workers 70
+```
 
+To train a final seq2seq model:
 ```
 fairseq-train  ${DATA_PATH} \
            --no-enc-token-positional-embeddings --elmo-affine --share-decoder-input-output-embed \
