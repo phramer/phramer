@@ -255,12 +255,16 @@ def _parallel_compute_and_write_scores(
         logging.info("Reading predictions from %s.", prediction_filename)
         targets = _record_gen(target_filename, delimiter)
         preds = _record_gen(prediction_filename, delimiter)
-        with tqdm(total=count_lines(target_filename), desc="Lines") as pbar:
+        with tqdm(
+            total=count_lines(target_filename), desc="Processed lines"
+        ) as pbar:
             for score in pool.imap_unordered(
                 partial(_process_lines, scorer=scorer), zip(targets, preds)
             ):
                 aggregator.add_scores(score)
                 pbar.update()
-    pool.close()
-    pool.join()
+    logging.info("Finished processing. Saving results...")
     _write_aggregates_to_csv(output_filename, aggregator.aggregate())
+    logging.info("Success!")
+    pool.close()
+    pool.terminate()

@@ -9,6 +9,7 @@ import collections
 
 import numpy as np
 import six
+from tqdm import tqdm
 
 
 class Score(
@@ -99,18 +100,20 @@ class BootstrapAggregator(object):
         """
 
         result = {}
-        for score_type, scores in six.iteritems(self._scores):
-            # Stack scores into a 2-d matrix of (sample, measure).
-            score_matrix = np.vstack(tuple(scores))
-            # Percentiles are returned as (interval, measure).
-            percentiles = self._bootstrap_resample(score_matrix)
-            # Extract the three intervals (low, mid, high).
-            intervals = tuple(
-                (scores[0].__class__(*percentiles[j, :]) for j in range(3))
-            )
-            result[score_type] = AggregateScore(
-                low=intervals[0], mid=intervals[1], high=intervals[2]
-            )
+        with tqdm(total=len(self._scores), desc="Aggregated results") as pbar:
+            for score_type, scores in six.iteritems(self._scores):
+                # Stack scores into a 2-d matrix of (sample, measure).
+                score_matrix = np.vstack(tuple(scores))
+                # Percentiles are returned as (interval, measure).
+                percentiles = self._bootstrap_resample(score_matrix)
+                # Extract the three intervals (low, mid, high).
+                intervals = tuple(
+                    (scores[0].__class__(*percentiles[j, :]) for j in range(3))
+                )
+                result[score_type] = AggregateScore(
+                    low=intervals[0], mid=intervals[1], high=intervals[2]
+                )
+                pbar.update()
         return result
 
     def _bootstrap_resample(self, matrix):
@@ -120,9 +123,9 @@ class BootstrapAggregator(object):
           matrix: A 2-d matrix of (sample, measure).
 
         Returns:
-          A 2-d matrix of (bounds, measure). There are three bounds: low (row 0),
-          mid (row 1) and high (row 2). Mid is always the mean, while low and high
-          bounds are specified by self._confidence_interval (which defaults to 0.95
+          A 2-d matrix of (bounds, measure). 
+          There are three bounds: low (row 0), mid (row 1) and high (row 2). Mid is always the mean, while low and high bounds are 
+          specified by self._confidence_interval (which defaults to 0.95
           meaning it will return the 2.5th and 97.5th percentiles for a 95%
           confidence interval on the mean).
         """

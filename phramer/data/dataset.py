@@ -190,7 +190,7 @@ class CNNDailyMail:
         writing_queue.put(PHRAMER_STOP_MESSAGE)
 
         pool.close()
-        pool.join()
+        pool.terminate()
 
 
 class GigawordDataset:
@@ -325,5 +325,5 @@ class RIANewsDataset:
                     pbar.update()
         queue.put(PHRAMER_STOP_MESSAGE)
         pool.close()
-        pool.join()
+        pool.terminate()
         logging.info("Finished processing the RIA dataset.")
