@@ -176,6 +176,7 @@ class Seq2SeqModel:
             *[model.max_positions() for model in models]
         )
 
+
         if args.buffer_size > 1:
             print('| Sentence buffer size:', args.buffer_size)
         print('| Type the input sentence and press return:')
@@ -184,10 +185,16 @@ class Seq2SeqModel:
         print("processing articles:")
         process_article(args.input, args.input)
         
-        for inputs in buffered_read(args.input, args.buffer_size):
+
+        self.task = task
+        self.max_positions = max_positions
+        self.args = args
+
+    def predict(self):
+        for inputs in buffered_read(self.args.input, self.args.buffer_size):
             indices = []
             results = []
-            for batch, batch_indices in make_batches(inputs, args, task, max_positions):
+            for batch, batch_indices in make_batches(inputs, self.args, self.task, self.max_positions):
                 indices.extend(batch_indices)
                 results += process_batch(batch)
 
