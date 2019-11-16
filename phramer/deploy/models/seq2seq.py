@@ -89,7 +89,7 @@ class Seq2SeqModel:
         # Load ensemble
         print('| loading model(s) from {}'.format(self.args.path))
         model_paths = self.args.path.split(':')
-        models, model_args = utils.load_ensemble_for_inference(model_paths, self.task, model_arg_overrides=eval(args.model_overrides))
+        models, model_args = utils.load_ensemble_for_inference(model_paths, self.task, model_arg_overrides=eval(self.args.model_overrides))
 
         # Set dictionaries
         self.tgt_dict = self.task.target_dictionary
@@ -97,7 +97,7 @@ class Seq2SeqModel:
         # Optimize ensemble for generation
         for model in models:
             model.make_generation_fast_(
-                beamable_mm_beam_size=None if args.no_beamable_mm else args.beam,
+                beamable_mm_beam_size=None if self.args.no_beamable_mm else self.args.beam,
                 need_attn=self.args.print_alignment,
             )
             if self.args.fp16:
@@ -129,9 +129,6 @@ class Seq2SeqModel:
         if self.args.buffer_size > 1:
             print('| Sentence buffer size:', self.args.buffer_size)
         print('| Type the input sentence and press return:')
-
-        print("processing articles:")
-        process_article(self.args.input, self.args.input)
 
     def make_result(self, src_str, hypos):
         result = Translation(
@@ -180,8 +177,11 @@ class Seq2SeqModel:
 
         return [self.make_result(batch.srcs[i], t) for i, t in enumerate(translations)]
 
-    def predict(self):
-        for inputs in buffered_read(self.args.input, self.args.buffer_size):
+    def predict(self, file_in='/home/pavel_fakanov/data.txt', file_processed='/home/pavel_fakanov/data_pr.txt'):
+        print("Preprocessing article:")
+        process_article(file_in, file_processed)
+
+        for inputs in buffered_read(file_processed, self.args.buffer_size):
             indices = []
             results = []
             for batch, batch_indices in make_batches(inputs, self.args, self.task, self.max_positions):
