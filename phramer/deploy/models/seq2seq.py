@@ -1,42 +1,19 @@
 import torch
 
 from types import SimpleNamespace
-
+import fileinput
 import numpy as np
 import sys
+from collections import namedtuple
+
 from fairseq import data, options, tasks, tokenizer, utils
 from fairseq.sequence_generator import SequenceGenerator
 from phramer.data.dataset import RIANewsDataset
 from phramer.deploy.models_config.ria_seq2seq import *
-# from phramer.deploy.models_config.ria_seq2seq import (
-#     DATA_PATH,
-#     CHECKPOINT_PATH,
-#     LM_CHECKPOINT_PATH,
-#     DATASET_NAME,
-#     INPUT_FILE_NAME,
-#     BUFFER_SIZE,
-#     BEAM,
-#     NBEST,
-#     MAX_LEN_A,
-#     MAX_LEN_B,
-#     MIN_LEN,
-#     NO_EARLY_STOP,
-#     UNNORMALIZED,
-#     NO_BEAMABLE_MM,
-#     LENPEN,
-#     UNKPEN,
-#     NO_REPEAT_NGRAM_SIZE,
-#     SAMPLING,
-#     SAMPLING_TOPK,
-#     SAMPLING_TEMPERATURE,
-#     DIVERSE_BEAM_GROUPS,
-#     DIVERSE_BEAM_STRENGTH,
-#
-#
-#
-#     CUDA_VISIBLE_DEVICES
-# )
 
+
+Batch = namedtuple('Batch', 'srcs tokens lengths')
+Translation = namedtuple('Translation', 'src_str hypos pos_scores alignments')
 
 def process_article(data_path, save_path):
     if DATASET_NAME == 'ria':
@@ -52,13 +29,14 @@ def process_article(data_path, save_path):
         f.close()
 
 
-def buffered_read(buffer_size):
+def buffered_read(input, buffer_size):
     buffer = []
-    for src_str in sys.stdin:
-        buffer.append(src_str.strip())
-        if len(buffer) >= buffer_size:
-            yield buffer
-            buffer = []
+    with fileinput.input(files=[input], openhook=fileinput.hook_encoded("utf-8")) as h:
+        for src_str in h:
+            buffer.append(src_str.strip())
+            if len(buffer) >= buffer_size:
+                yield buffer
+                buffer = []
 
     if len(buffer) > 0:
         yield buffer
@@ -203,6 +181,24 @@ class Seq2SeqModel:
         print('| Type the input sentence and press return:')
 
 
+        print("processing articles:")
+        process_article(args.input, args.input)
+        
+        for inputs in buffered_read(args.input, args.buffer_size):
+            indices = []
+            results = []
+            for batch, batch_indices in make_batches(inputs, args, task, max_positions):
+                indices.extend(batch_indices)
+                results += process_batch(batch)
+
+            for i in np.argsort(indices):
+                result = results[i]
+                print(result.src_str)
+                for hypo, pos_scores, align in zip(result.hypos, result.pos_scores, result.alignments):
+                    print(hypo)
+                    print(pos_scores)
+                    if align is not None:
+                        print(align)
 
     def build_args(self):
         fields = ['max_tokens', 'max_sentences', 'buffer_size', 'sampling', 'nbest', 'beam', \
