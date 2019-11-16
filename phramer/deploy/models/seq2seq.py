@@ -23,17 +23,19 @@ Batch = namedtuple('Batch', 'srcs tokens lengths')
 Translation = namedtuple('Translation', 'src_str hypos pos_scores alignments')
 
 def process_article(args, data_path, save_path):
+    with open(data_path, 'r+') as f:
+        article = f.read()
+
+    article = article.lower()
+    article = article.replace('\n', ' ')
+
     if args.dataset_name == 'ria':
         ria = RIANewsDataset()
-        with open(data_path, 'r+') as f:
-            article = f.read()
-
         article = ria._process_article(article)
-        article = article.replace('\n', ' ')
 
-        f = open(save_path, 'w+')
-        f.write(article)
-        f.close()
+    f = open(save_path, 'w+')
+    f.write(article)
+    f.close()
 
 
 def buffered_read(input, buffer_size):
