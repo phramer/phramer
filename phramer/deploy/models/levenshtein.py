@@ -12,7 +12,10 @@ from phramer.deploy.deploy_config import CONFIG_NAME
 
 if CONFIG_NAME == 'ria_levenshtein':
     from phramer.deploy.models_config.ria_levenshtein import *
-
+elif CONFIG_NAME == 'gigaword_levenshtein':
+    from phramer.deploy.models_config.gigaword_levenshtein import *
+elif CONFIG_NAME == 'cnndm_levenshtein':
+    from phramer.deploy.models_config.cnndm_levenshtein import *
 else:
     print("ERROR, PLEASE SPECIFY THE CORRECT CONFIG NAME")
 
