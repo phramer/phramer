@@ -1,7 +1,7 @@
-DATA_PATH = '/home/pavel_fakanov/data/ria_seq2seq/data-bin/'
-CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/ria_seq2seq/checkpoint_best.pt'
-LM_CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/ria_lm/checkpoints_best.pt'
-DATASET_NAME = 'ria'
+DATA_PATH = '/home/pavel_fakanov/data/gigaword_seq2seq/data-bin/'
+CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/gigaword_seq2seq/checkpoint_best.pt'
+LM_CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/gigaword_lm/checkpoints_best.pt'
+DATASET_NAME = 'gigaword'
 BUFFER_SIZE = 0
 BEAM = 5
 NBEST = 1

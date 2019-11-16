@@ -1,4 +1,1 @@
-FAIRSEQ_PATH='/home/pavel_fakanov/fairseq'
-MODELS_CHECKPOINTS = [
-        
-]
+CONFIG_NAME = 'ria_seq2seq'

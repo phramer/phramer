@@ -9,14 +9,21 @@ from collections import namedtuple
 from fairseq import data, options, tasks, tokenizer, utils
 from fairseq.sequence_generator import SequenceGenerator
 from phramer.data.dataset import RIANewsDataset
-from phramer.deploy.models_config.ria_seq2seq import *
+from phramer.deploy.deploy_config import CONFIG_NAME
+
+if CONFIG_NAME == 'ria_seq2seq':
+    from phramer.deploy.models_config.ria_seq2seq import *
+elif CONFIG_NAME == 'gigaword_seq2seq':
+    from phramer.deploy.models_config.gigaword_seq2seq import *
+else:
+    print("ERROR, PLEASE SPECIFY THE CORRECT CONFIG NAME")
 
 
 Batch = namedtuple('Batch', 'srcs tokens lengths')
 Translation = namedtuple('Translation', 'src_str hypos pos_scores alignments')
 
-def process_article(data_path, save_path):
-    if DATASET_NAME == 'ria':
+def process_article(args, data_path, save_path):
+    if args.dataset_name == 'ria':
         ria = RIANewsDataset()
         with open(data_path, 'r+') as f:
             article = f.read()
@@ -179,7 +186,7 @@ class Seq2SeqModel:
 
     def predict(self, file_in='/home/pavel_fakanov/data.txt', file_processed='/home/pavel_fakanov/data_pr.txt'):
         print("Preprocessing article:")
-        process_article(file_in, file_processed)
+        process_article(self.args, file_in, file_processed)
 
         for inputs in buffered_read(file_processed, self.args.buffer_size):
             indices = []
@@ -197,7 +204,8 @@ class Seq2SeqModel:
                     if align is not None:
                         print(align)
 
-    def build_args(self):
+
+    def build_args(self, config_name='gigaword_seq2seq'):
         fields = ['max_tokens', 'max_sentences', 'buffer_size', 'sampling', 'nbest', 'beam', \
                 'print_alignment', 'cpu', 'path', 'model_overrides', 'no_beamable_mm', \
                 'fp16', 'min_len', 'no_early_stop', 'unnormalized', 'lenpen', 'unkpen', \
@@ -208,7 +216,7 @@ class Seq2SeqModel:
                 'gen_subset', 'input', 'log_format', 'log_interval', 'max_source_positions', \
                 'max_target_positions', 'no_progress_bar', 'num_shards', 'prefix_size', \
                 'quiet', 'score_reference', 'seed', 'shard_id', 'skip_invalid_size_inputs_valid_test', \
-                'upsample_primary', 'encoder_embed_path']
+                'upsample_primary', 'encoder_embed_path', 'dataset_name']
 
         defaults_dict = dict(zip(fields, (None,) * len(fields)))
         args = SimpleNamespace(**defaults_dict)
@@ -255,5 +263,5 @@ class Seq2SeqModel:
         args.data = [DATA_PATH]
         args.path = CHECKPOINT_PATH
         args.encoder_embed_path = LM_CHECKPOINT_PATH
-        args.input = INPUT_FILE_NAME
+        args.dataset_name = DATASET_NAME
         return args
