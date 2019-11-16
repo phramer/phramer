@@ -1,1 +1,1 @@
-CONFIG_NAME = 'gigaword_seq2seq'
+CONFIG_NAME = 'cnndm_seq2seq'

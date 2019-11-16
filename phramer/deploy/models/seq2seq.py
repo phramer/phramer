@@ -15,6 +15,8 @@ if CONFIG_NAME == 'ria_seq2seq':
     from phramer.deploy.models_config.ria_seq2seq import *
 elif CONFIG_NAME == 'gigaword_seq2seq':
     from phramer.deploy.models_config.gigaword_seq2seq import *
+elif CONFIG_NAME == 'cnndm_seq2seq':
+    from phramer.deploy.models_config.cnndm_seq2seq import *
 else:
     print("ERROR, PLEASE SPECIFY THE CORRECT CONFIG NAME")
 
