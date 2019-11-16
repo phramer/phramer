@@ -1,1 +1,1 @@
-CONFIG_NAME = 'ria_seq2seq'
+CONFIG_NAME = 'gigaword_seq2seq'
