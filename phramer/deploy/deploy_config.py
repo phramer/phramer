@@ -1,1 +1,1 @@
-CONFIG_NAME = 'ria_levenshtein'
+CONFIG_NAME = 'gigaword_levenshtein'

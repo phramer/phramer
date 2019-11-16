@@ -24,10 +24,7 @@ Batch = namedtuple('Batch', 'ids src_tokens src_lengths')
 Translation = namedtuple('Translation', 'src_str hypos pos_scores alignments')
 
 
-def process_article(args, data_path, save_path):
-    with open(data_path, 'r+') as f:
-        article = f.read()
-
+def process_article(args, article):
     article = article.lower()
     article = article.replace('\n', ' ')
 
@@ -35,9 +32,7 @@ def process_article(args, data_path, save_path):
         ria = RIANewsDataset()
         article = ria._process_article(article)
 
-    f = open(save_path, 'w+')
-    f.write(article)
-    f.close()
+    return article
 
 
 def buffered_read(input, buffer_size):
@@ -143,9 +138,10 @@ class LevenshteinModel:
             print('| Sentence buffer size:', self.args.buffer_size)
         print('| Type the input sentence and press return:')
 
-    def predict(self, file_in='/home/pavel_fakanov/data.txt', file_processed='/home/pavel_fakanov/data_pr.txt'):
+    def predict(self, article):
         print("Preprocessing article:")
-        process_article(self.args, file_in, file_processed)
+        article = process_article(self.args, article)
+        
         start_id = 0
 
         for inputs in buffered_read(file_processed, self.args.buffer_size):
@@ -196,6 +192,17 @@ class LevenshteinModel:
                             id,
                             alignment_str
                         ))
+                    
+                    if self.args.print_step:
+                        print('I-{}\t{}'.format(start_id, hypo['steps']))    
+                    if self.args.retain_iter_history:
+                         print("\n".join([
+                                'E-{}_{}\t{}'.format(
+                                start_id, step,
+                                utils.post_process_prediction(
+                                    h['tokens'].int().cpu(),
+                                    src_str, None, None, self.tgt_dict, None)[1])
+                                for step, h in enumerate(hypo['history'])]))
 
             # update running id counter
             start_id += len(inputs)

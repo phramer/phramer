@@ -1,6 +1,6 @@
 DATA_PATH = '/home/pavel_fakanov/data/gigaword_levenshtein/data-bin/'
 CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/gigaword_levenshtein/checkpoint_best.pt'
-DATASET_NAME = 'ria'
+DATASET_NAME = 'gigaword'
 BUFFER_SIZE = 0
 BEAM = 5
 NBEST = 1
@@ -47,7 +47,7 @@ NO_PROGRESS_BAR = False
 NOISE = 'random_delete'
 NUM_WORKERS = 1
 OPTIMIZER = 'nag'
-PRINT_STEP = False
+PRINT_STEP = True
 RAW_TEXT = False
 REMOVE_BPE = '@@'
 REQUIRED_BATCH_SIZE_MULTIPLE = 8
