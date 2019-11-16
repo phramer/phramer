@@ -1,1 +1,1 @@
-CONFIG_NAME = 'cnndm_seq2seq'
+CONFIG_NAME = 'ria_levenshtein'
