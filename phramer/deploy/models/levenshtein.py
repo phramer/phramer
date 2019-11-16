@@ -259,7 +259,7 @@ class LevenshteinModel:
         args.max_sentences = MAX_SENTENCES
         args.max_source_positions = MAX_SOURCE_POSITIONS
         args.max_target_positions = MAX_TARGET_POSITIONS
-        args.memory_efficient_fp16 MEMORY_EFFICIENT_FP16
+        args.memory_efficient_fp16 = MEMORY_EFFICIENT_FP16
         args.min_len = MIN_LEN
         args.min_loss_scale = MIN_LOSS_SCALE
         args.model_overrides = MODEL_OVERRIDES
