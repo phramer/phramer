@@ -77,7 +77,7 @@ class LevenshteinModel:
     """
 
     def __init__(self):
-        self.args = self.build_args(self)
+        self.args = self.build_args()
         utils.import_user_module(self.args)
 
         if self.args.buffer_size < 1:
@@ -124,7 +124,7 @@ class LevenshteinModel:
         self.generator = self.task.build_generator(self.args)
 
         # Handle tokenization and BPE
-        tokenizer = encoders.build_tokenizer(self.args)
+        self.tokenizer = encoders.build_tokenizer(self.args)
         self.bpe = encoders.build_bpe(self.args)
 
         # Load alignment dictionary for unknown word replacement
@@ -133,7 +133,7 @@ class LevenshteinModel:
 
         self.max_positions = utils.resolve_max_positions(
             self.task.max_positions(),
-            *[model.max_positions() for model in models]
+            *[model.max_positions() for model in self.models]
         )
 
         if self.args.buffer_size > 1:
@@ -266,7 +266,7 @@ class LevenshteinModel:
         args.upsample_primary = UPSAMPLE_PRIMARY
         args.source_lang = 'articles'
         args.target_lang = 'summaries'
-        args.data = [DATA_PATH]
+        args.data = DATA_PATH
         args.path = CHECKPOINT_PATH
         args.dataset_name = DATASET_NAME
         return args
