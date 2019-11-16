@@ -7,19 +7,35 @@ import sys
 from fairseq import data, options, tasks, tokenizer, utils
 from fairseq.sequence_generator import SequenceGenerator
 from phramer.data.dataset import RIANewsDataset
-from phramer.deploy.models_config.ria_seq2seq import (
-    DATA_PATH,
-    CHECKPOINT_PATH,
-    LM_CHECKPOINT_PATH,
-    DATASET_NAME,
-    INPUT_FILE_NAME,
-    REMOVE_BPE,
-    MIN_LEN,
-    BEAM,
-    NO_REPEAT_NGRAM,
-    NBEST,
-    CUDA_VISIBLE_DEVICES
-)
+from phramer.deploy.models_config.ria_seq2seq import *
+# from phramer.deploy.models_config.ria_seq2seq import (
+#     DATA_PATH,
+#     CHECKPOINT_PATH,
+#     LM_CHECKPOINT_PATH,
+#     DATASET_NAME,
+#     INPUT_FILE_NAME,
+#     BUFFER_SIZE,
+#     BEAM,
+#     NBEST,
+#     MAX_LEN_A,
+#     MAX_LEN_B,
+#     MIN_LEN,
+#     NO_EARLY_STOP,
+#     UNNORMALIZED,
+#     NO_BEAMABLE_MM,
+#     LENPEN,
+#     UNKPEN,
+#     NO_REPEAT_NGRAM_SIZE,
+#     SAMPLING,
+#     SAMPLING_TOPK,
+#     SAMPLING_TEMPERATURE,
+#     DIVERSE_BEAM_GROUPS,
+#     DIVERSE_BEAM_STRENGTH,
+#
+#
+#
+#     CUDA_VISIBLE_DEVICES
+# )
 
 
 def process_article(data_path, save_path):
@@ -202,46 +218,45 @@ class Seq2SeqModel:
                 'upsample_primary', 'encoder_embed_path']
 
         defaults_dict = dict(zip(fields, (None,) * len(fields)))
-        defaults_dict['buffer_size'] = 0
-        defaults_dict['beam'] = 5
-        defaults_dict['nbest'] = 1
-        defaults_dict['max_len_a'] = 0
-        defaults_dict['max_len_b'] = 200
-        defaults_dict['min_len'] = 1
-        defaults_dict['no_early_stop'] = False
-        defaults_dict['unnormalized'] = False
-        defaults_dict['no_beamable_mm'] = False
-        defaults_dict['lenpen'] = 1
-        defaults_dict['unkpen'] = 0
-        defaults_dict['no_repeat_ngram_size'] = 0
-        defaults_dict['sampling'] = False
-        defaults_dict['sampling_topk'] = -1
-        defaults_dict['sampling_temperature'] = 1
-        defaults_dict['diverse_beam_groups'] = 1
-        defaults_dict['diverse_beam_strength'] = 0.5
-        defaults_dict['print_alignment'] = False
-        defaults_dict['cpu'] = False
-        defaults_dict['fp16'] = False
-        defaults_dict['task'] = 'translation'
-        defaults_dict['left_pad_source'] = True
-        defaults_dict['left_pad_target'] = False
-        defaults_dict['fp16_init_scale'] = 128
-        defaults_dict['log_interval'] = 1000
-        defaults_dict['max_source_positions'] = 1024
-        defaults_dict['max_target_positions'] = 1024
-        defaults_dict['model_overrides'] = '{}'
-        defaults_dict['no_progress_bar'] = False
-        defaults_dict['num_shards'] = 1
-        defaults_dict['prefix_size'] = 0
-        defaults_dict['quiet'] = False
-        defaults_dict['score_reference'] = False
-        defaults_dict['seed'] = 1
-        defaults_dict['shard_id'] = 0
-        defaults_dict['skip_invalid_size_inputs_valid_test'] = False
-        defaults_dict['upsample_primary'] = 1
-        
         args = SimpleNamespace(**defaults_dict)
-        
+
+        args.buffer_size = BUFFER_SIZE
+        args.beam = BEAM
+        args.nbest = NBEST
+        args.max_len_a = MAX_LEN_A
+        args.max_len_b = MAX_LEN_B
+        args.min_len = MIN_LEN
+        args.no_early_stop = NO_EARLY_STOP
+        args.unnormalized = UNNORMALIZED
+        args.no_beamable_mm = NO_BEAMABLE_MM
+        args.lenpen = LENPEN
+        args.unkpen = UNKPEN
+        args.no_repeat_ngram_size = NO_REPEAT_NGRAM_SIZE
+        args.sampling = SAMPLING
+        args.sampling_topk = SAMPLING_TOPK
+        args.sampling_temperature = SAMPLING_TEMPERATURE
+        args.diverse_beam_groups = DIVERSE_BEAM_GROUPS
+        args.diverse_beam_strength = DIVERSE_BEAM_STRENGTH
+        args.print_alignment = PRINT_ALIGNMENT
+        args.cpu = CPU
+        args.fp16 = FP16
+        args.task = TASK
+        args.left_pad_source = LEFT_PAD_SOURCE
+        args.left_pad_target = LEFT_PAD_TARGET
+        args.fp16_init_scale = FP16_INIT_SCALE
+        args.log_interval = LOG_INTERVAL
+        args.max_source_positions = MAX_SOURCE_POSITIONS
+        args.max_target_positions = MAX_TARGET_POSITIONS
+        args.model_overrides = MODEL_OVERRIDES
+        args.no_progress_bar = NO_PROGRESS_BAR
+        args.num_shards = NUM_SHARDS
+        args.prefix_size = PREFIX_SIZE
+        args.quiet = QUIET
+        args.score_reference = SCORE_REFERENCE
+        args.seed = SEED
+        args.shard_id = SHARD_ID
+        args.skip_invalid_size_inputs_valid_test = SKIP_INVALID_SIZE_INPUTS_VALID_TEST
+        args.upsample_primary = UPSAMPLE_PRIMARY
         args.source_lang = 'articles'
         args.target_lang = 'summaries'
         args.data = [DATA_PATH]
