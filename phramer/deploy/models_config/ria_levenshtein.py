@@ -1,6 +1,6 @@
 DATA_PATH = '/home/pavel_fakanov/data/ria_levenshtein/data-bin/'
 CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/ria_levenshtein/checkpoint_best.pt'
-DATASET_NAME = 'ria'
+DATASET_NAME = 'ria_levenshtein'
 BUFFER_SIZE = 0
 BEAM = 5
 NBEST = 1

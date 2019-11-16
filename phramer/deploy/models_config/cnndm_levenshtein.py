@@ -1,6 +1,6 @@
 DATA_PATH = '/home/pavel_fakanov/data/gigaword_levenshtein/data-bin/'
 CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/gigaword_levenshtein/checkpoint_best.pt'
-DATASET_NAME = 'cnndm'
+DATASET_NAME = 'cnndm_levenshtein'
 BUFFER_SIZE = 0
 BEAM = 5
 NBEST = 1

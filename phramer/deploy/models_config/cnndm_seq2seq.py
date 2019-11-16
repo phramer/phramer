@@ -1,7 +1,7 @@
 DATA_PATH = '/home/pavel_fakanov/data/cnndm_seq2seq/data-bin/'
 CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/cnndm_seq2seq/checkpoint_best.pt'
 LM_CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/cnndm_lm/checkpoints_best.pt'
-DATASET_NAME = 'cnndm'
+DATASET_NAME = 'cnndm_seq2seq'
 BUFFER_SIZE = 0
 BEAM = 5
 NBEST = 1

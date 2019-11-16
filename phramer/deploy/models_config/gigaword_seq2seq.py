@@ -1,7 +1,7 @@
 DATA_PATH = '/home/pavel_fakanov/data/gigaword_seq2seq/data-bin/'
 CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/gigaword_seq2seq/checkpoint_best.pt'
 LM_CHECKPOINT_PATH = '/home/pavel_fakanov/checkpoints/gigaword_lm/checkpoints_best.pt'
-DATASET_NAME = 'gigaword'
+DATASET_NAME = 'gigaword_seq2seq'
 BUFFER_SIZE = 0
 BEAM = 5
 NBEST = 1

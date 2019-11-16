@@ -3,6 +3,7 @@ import torch
 from types import SimpleNamespace
 import fileinput
 import numpy as np
+import random
 import sys
 from collections import namedtuple
 
@@ -24,20 +25,15 @@ else:
 Batch = namedtuple('Batch', 'srcs tokens lengths')
 Translation = namedtuple('Translation', 'src_str hypos pos_scores alignments')
 
-def process_article(args, data_path, save_path):
-    with open(data_path, 'r+') as f:
-        article = f.read()
-
+def process_article(args, article):
     article = article.lower()
     article = article.replace('\n', ' ')
 
-    if args.dataset_name == 'ria':
+    if args.dataset_name.split('_')[0] == 'ria':
         ria = RIANewsDataset()
         article = ria._process_article(article)
 
-    f = open(save_path, 'w+')
-    f.write(article)
-    f.close()
+    return article
 
 
 def buffered_read(input, buffer_size):
@@ -188,11 +184,18 @@ class Seq2SeqModel:
 
         return [self.make_result(batch.srcs[i], t) for i, t in enumerate(translations)]
 
-    def predict(self, file_in='/home/pavel_fakanov/data.txt', file_processed='/home/pavel_fakanov/data_pr.txt'):
+    def predict(self, article):
         print("Preprocessing article:")
-        process_article(self.args, file_in, file_processed)
+        article = process_article(self.args, article)
 
-        for inputs in buffered_read(file_processed, self.args.buffer_size):
+        file_path = '/home/pavel_fakanov/server_requests/' + self.args.dataset_name + '/' + \
+                                                        str(random.randint(100000))
+
+        file = open(file_path, 'w+')
+        file.write(article)
+        file.close()
+
+        for inputs in buffered_read(file_path, self.args.buffer_size):
             indices = []
             results = []
             for batch, batch_indices in make_batches(inputs, self.args, self.task, self.max_positions):

@@ -1,6 +1,7 @@
 from collections import namedtuple
 import fileinput
 from types import SimpleNamespace
+import random
 
 import torch
 
@@ -28,7 +29,7 @@ def process_article(args, article):
     article = article.lower()
     article = article.replace('\n', ' ')
 
-    if args.dataset_name == 'ria':
+    if args.dataset_name.split('_')[0] == 'ria':
         ria = RIANewsDataset()
         article = ria._process_article(article)
 
@@ -141,10 +142,16 @@ class LevenshteinModel:
     def predict(self, article):
         print("Preprocessing article:")
         article = process_article(self.args, article)
-        
+
+        file_path = '/home/pavel_fakanov/server_requests/' + self.args.dataset_name + '/' + \
+                                     str(random.randint(100000))
+        file = open(file_path, 'w+')
+        file.write(article)
+        file.close()
+
         start_id = 0
 
-        for inputs in buffered_read(file_processed, self.args.buffer_size):
+        for inputs in buffered_read(file_path, self.args.buffer_size):
             results = []
             for batch in make_batches(inputs, self.args, self.task, self.max_positions, self.encode_fn):
                 src_tokens = batch.src_tokens
