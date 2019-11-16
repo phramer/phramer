@@ -212,61 +212,95 @@ class LevenshteinModel:
         return x
 
     def build_args(self):
-        fields = ['max_tokens', 'max_sentences', 'buffer_size', 'sampling', 'nbest', 'beam', \
-                'print_alignment', 'cpu', 'path', 'model_overrides', 'no_beamable_mm', \
-                'fp16', 'min_len', 'no_early_stop', 'unnormalized', 'lenpen', 'unkpen', \
-                'sampling_topk', 'sampling_temperature', 'diverse_beam_groups', \
-                'diverse_beam_strength', 'no_repeat_ngram_size', 'replace_unk', 'remove_bpe', \
-                'max_len_a', 'max_len_b', 'task', 'left_pad_source', 'left_pad_target', \
-                'source_lang', 'target_lang', 'data', 'fp16_init_scale', 'fp16_scale_window', \
-                'gen_subset', 'input', 'log_format', 'log_interval', 'max_source_positions', \
-                'max_target_positions', 'no_progress_bar', 'num_shards', 'prefix_size', \
-                'quiet', 'score_reference', 'seed', 'shard_id', 'skip_invalid_size_inputs_valid_test', \
-                'upsample_primary', 'encoder_embed_path', 'dataset_name']
+        fields = ['beam', 'bpe', 'buffer_size', 'cpu', 'criterion',  'data', 'dataset_impl', 'decoding_format', \
+                  'diverse_beam_groups', 'diverse_beam_strength', 'empty_cache_freq', 'force_anneal', 'fp16', \
+                  'fp16_init_scale', 'fp16_scale_tolerance', 'fp16_scale_window', 'gen_subset', 'iter_decode_eos_penalty', \
+                  'iter_decode_force_max_iter', 'iter_decode_max_iter', 'lazy_load', 'left_pad_source', 'left_pad_target', \
+                  'lenpen', 'load_alignments', 'log_format', 'log_interval', 'lr_scheduler', 'lr_shrink', \
+                  'match_source_len', 'max_len_a', 'max_len_b', 'max_sentences', 'max_source_positions', \
+                  'max_target_positions', 'max_tokens', 'memory_efficient_fp16', 'min_len', 'min_loss_scale', \
+                  'model_overrides', 'momentum', 'nbest', 'no_beamable_mm', 'no_early_stop', 'no_progress_bar', \
+                  'no_repeat_ngram_size', 'noise', 'num_shards', 'num_workers', 'optimizer', 'path', 'prefix_size', \
+                  'print_alignment', 'print_step', 'quiet', 'raw_text', 'dataset_name', 'remove_bpe', 'replace_unk', \
+                  'required_batch_size_multiple', 'results_path', 'retain_iter_history', 'sacrebleu', 'sampling', \
+                  'sampling_topk', 'sampling_topp', 'score_reference', 'seed', 'shard_id', 'skip_invalid_size_inputs_valid_test', \
+                  'task', 'temperature', 'tensorboard_logdir', 'threshold_loss_scale', 'tokenizer', 'unkpen', \
+                  'unnormalized', 'upsample_primary', 'user_dir', 'warmup_updates', 'weight_decay']
 
         defaults_dict = dict(zip(fields, (None,) * len(fields)))
         args = SimpleNamespace(**defaults_dict)
 
-        args.buffer_size = BUFFER_SIZE
         args.beam = BEAM
-        args.nbest = NBEST
-        args.max_len_a = MAX_LEN_A
-        args.max_len_b = MAX_LEN_B
-        args.min_len = MIN_LEN
-        args.no_early_stop = NO_EARLY_STOP
-        args.unnormalized = UNNORMALIZED
-        args.no_beamable_mm = NO_BEAMABLE_MM
-        args.lenpen = LENPEN
-        args.unkpen = UNKPEN
-        args.no_repeat_ngram_size = NO_REPEAT_NGRAM_SIZE
-        args.sampling = SAMPLING
-        args.sampling_topk = SAMPLING_TOPK
-        args.sampling_temperature = SAMPLING_TEMPERATURE
+        args.buffer_size = BUFFER_SIZE
+        args.cpu = CPU
+        args.criterion = CRITERION
+        args.data = DATA_PATH
         args.diverse_beam_groups = DIVERSE_BEAM_GROUPS
         args.diverse_beam_strength = DIVERSE_BEAM_STRENGTH
-        args.print_alignment = PRINT_ALIGNMENT
-        args.cpu = CPU
+        args.empty_cache_freq = EMPTY_CACHE_FREQ
         args.fp16 = FP16
-        args.task = TASK
+        args.fp16_init_scale = FP16_INIT_SCALE
+        args.fp16_scale_tolerance = FP16_SCALE_TOLERANCE
+        args.gen_subset = GEN_SUBSET
+        args.iter_decode_eos_penalty = ITER_DECODE_EOS_PENALTY
+        args.iter_decode_force_max_iter = ITER_DECODE_FORCE_MAX_ITER
+        args.iter_decode_max_iter = ITER_DECODE_MAX_ITER
+        args.lazy_load = LAZY_LOAD
         args.left_pad_source = LEFT_PAD_SOURCE
         args.left_pad_target = LEFT_PAD_TARGET
-        args.fp16_init_scale = FP16_INIT_SCALE
+        args.lenpen = LENPEN
+        args.load_alignments = LOAD_ALIGNMENTS
         args.log_interval = LOG_INTERVAL
+        args.lr_scheduler = LR_SHEDULER
+        args.lr_shrink = LR_SHRINK
+        args.match_source_len = MATCH_SOURCE_LEN
+        args.max_len_a = MAX_LEN_A
+        args.max_len_b = MAX_LEN_B
+        args.max_sentences = MAX_SENTENCES
         args.max_source_positions = MAX_SOURCE_POSITIONS
         args.max_target_positions = MAX_TARGET_POSITIONS
+        args.memory_efficient_fp16 MEMORY_EFFICIENT_FP16
+        args.min_len = MIN_LEN
+        args.min_loss_scale = MIN_LOSS_SCALE
         args.model_overrides = MODEL_OVERRIDES
+        args.momentum = MOMENTUM
+        args.nbest = NBEST
+        args.no_beamable_mm = NO_BEAMABLE_MM
+        args.no_early_stop = NO_EARLY_STOP
         args.no_progress_bar = NO_PROGRESS_BAR
+        args.no_repeat_ngram_size = NO_REPEAT_NGRAM_SIZE
+        args.noise = NOISE
         args.num_shards = NUM_SHARDS
+        args.num_workers = NUM_WORKERS
+        args.optimizer = OPTIMIZER
+        args.path = CHECKPOINT_PATH
         args.prefix_size = PREFIX_SIZE
+        args.print_alignment = PRINT_ALIGNMENT
+        args.print_step = PRINT_STEP
         args.quiet = QUIET
+        args.raw_text = RAW_TEXT
+        args.remove_bpe = REMOVE_BPE
+        args.required_batch_size_multiple = REQUIRED_BATCH_SIZE_MULTIPLE
+        args.retain_iter_history = RETAIN_ITER_HISTORY
+        args.sacrebleu = SACREBLEU
+        args.sampling = SAMPLING
+        args.sampling_topk = SAMPLING_TOPK
+        args.sampling_topp = SAMPLING_TOPP
         args.score_reference = SCORE_REFERENCE
         args.seed = SEED
         args.shard_id = SHARD_ID
         args.skip_invalid_size_inputs_valid_test = SKIP_INVALID_SIZE_INPUTS_VALID_TEST
+        args.task = TASK
+        args.temperature = TEMPERATURE
+        args.tensorboard_logdir = TENSORBOARD_LOGDIR
+        args.unkpen = UNKPEN
+        args.unnormalized = UNNORMALIZED
         args.upsample_primary = UPSAMPLE_PRIMARY
+        args.warmup_updates = WARMUP_UPDATES
+        args.weight_decay = WEIGHT_DECAY
+
+        args.dataset_name = DATASET_NAME
         args.source_lang = 'articles'
         args.target_lang = 'summaries'
-        args.data = DATA_PATH
-        args.path = CHECKPOINT_PATH
-        args.dataset_name = DATASET_NAME
+
         return args
