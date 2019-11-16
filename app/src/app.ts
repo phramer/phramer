@@ -8,8 +8,6 @@ import path from "path";
 import { SESSION_SECRET } from "./util/secrets";
 
 // Controllers (route handlers)
-import * as homeController from "./controllers/home";
-import * as apiController from "./controllers/api";
 import * as dashboardController from "./controllers/dashboard";
 // Create Express server
 const app = express();
