@@ -31,7 +31,6 @@ class CNNDailyMail:
     """
     Handler for CNN DailyMail dataset
     """
-
     def __init__(self):
         from nltk.stem import WordNetLemmatizer
 
@@ -139,6 +138,17 @@ class CNNDailyMail:
         num_workers=mp.cpu_count() - 1,
         dataset_tag=CNNDM_TAG,
     ):
+    """
+    Cleans the CNN/DM stories up and separates the highlights into a separate file. 
+
+    Args:
+        cnn_dir: the directory with CNN stories
+        dm_dir: the directory with Daily Mail stories
+        target_dir: the directory where to save preprocessed data
+        num_workers: the number of parallel workers in the pool (default: all cpus but one)
+        dataset_tag: the file tag for the dataset (affects the target path) 
+                     (default: cnndm)
+    """
         logging.info(
             "Preparing to process the CNN dataset. This might take a while..."
         )
@@ -286,6 +296,17 @@ class RIANewsDataset:
         should_lemmatize=True,
         dataset_tag=RIA_DATASET_TAG,
     ):
+    """
+    Parses and cleans up the RIA news dataset into separate files for stories and titles.
+
+    Args:
+        source_filename: the file with line-by-line json representation of the data
+        target_dir: the target directory for the files
+        num_workers: the number of workers in the pool (default: all CPUs but one)
+        should_lemmatize: whether to lemmatize the words (default: True)
+        dataset_tag: the file tag for the dataset (affects the target path) 
+                     (default: ria)
+    """
         target_dir = Path(target_dir)
         target_dir.mkdir(parents=True, exist_ok=True)
         target_articles_path = target_dir / "{}.{}".format(
